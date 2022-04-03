@@ -1,0 +1,10 @@
+{% extends "layout.html" %}
+{% block content %}
+    {% for name in languages %}
+        <article class="media content-section">
+          <div class="media-body">
+            <h1>{{name.language}}</h1>
+          </div>
+        </article>
+    {% endfor %}
+{% endblock content %}
