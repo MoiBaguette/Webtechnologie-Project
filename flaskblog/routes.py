@@ -102,10 +102,10 @@ def new_post():
     return render_template('create_post.html', title='New Post',
                             form=form, legend='New Post')
 
-@app.route("/post/<int:post_id>")
-def post(post_id):
-    #post = Post.query.get_or_404(post_id)
-    return render_template('post.html', title=post.title, post=post)
+@app.route("/course/<int:course_id>")
+def course(course_id):
+    course = Language.query.get_or_404(course_id)
+    return render_template('course.html', title=course.name, course=course)
 
 @app.route("/post/<int:post_id>/update", methods=['GET', 'POST'])
 @login_required
