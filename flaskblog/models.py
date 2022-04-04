@@ -10,6 +10,7 @@ def load_user(user_id):
 
 class User(db.Model, UserMixin):
     id = db.Column(db.Integer, primary_key=True)
+    type = db.Column(db.string(6), nullable=False, default="client")
     username = db.Column(db.String(20), unique=True, nullable=False)
     email = db.Column(db.String(120), unique=True, nullable=False)
     image_file = db.Column(db.String(20), nullable=False, default='default.jpg')
@@ -20,10 +21,11 @@ class User(db.Model, UserMixin):
 
 class Language(db.Model):
     id = db.Column(db.Integer, primary_key=True)
-    language = db.Column(db.String(100), nullable=False)
+    name = db.Column(db.String(100), nullable=False)
+    info = db.Column(db.Text)
     
     def __repr__(self):
-        return f"Language('{self.language}')"
+        return f"Language('{self.name}', '{self.info}')"
     
 class Classes(db.Model):
     id = db.Column(db.Integer, primary_key=True)

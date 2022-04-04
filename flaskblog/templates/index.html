@@ -3,7 +3,8 @@
     {% for name in languages %}
         <article class="media content-section">
           <div class="media-body">
-            <h1>{{name.language}}</h1>
+            <h1>{{languages.name}}</h1>
+            <p> {{languages.info}}</p>
           </div>
         </article>
     {% endfor %}
