@@ -5,10 +5,9 @@ from flask import abort, flash, redirect, render_template, request, url_for
 from flask_login import current_user, login_required, login_user, logout_user
 from PIL import Image
 
-from programmeerles import app, bcrypt, db
-from programmeerles.forms import (LoginForm, PostForm, RegistrationForm,
-                                  UpdateAccountForm)
-from programmeerles.models import Classes, Language, User
+from . import app, bcrypt, db
+from .forms import LoginForm, PostForm, RegistrationForm, UpdateAccountForm
+from .models import Classes, Language, User
 
 
 @app.route("/")
@@ -59,18 +58,20 @@ def logout():
     logout_user()
     return redirect('/')
 
+
 def save_picture(form_picture):
     random_hex = secrets.token_hex(8)
     _, f_ext = os.path.splitext(form_picture.filename)
     picture_fn = random_hex + f_ext
     picturepath = os.path.join(app.root_path, 'static/profile_pics', picture_fn)
-    
+
     output_size = (125, 125)
     i = Image.open(form_picture)
     i.thumbnail(output_size)
     i.save(picturepath)
-    
+
     return picture_fn
+
 
 @app.route("/account", methods=['GET', 'POST'])
 @login_required
@@ -91,6 +92,7 @@ def account():
     image_file = url_for('static', filename='profile_pics/' + current_user.image_file)
     return render_template('account.html', title='Account', image_file=image_file, form=form)
 
+
 @app.route("/post/new", methods=['GET', 'POST'])
 @login_required
 def new_post():
@@ -102,12 +104,14 @@ def new_post():
         flash('Your post has been created!', 'success')
         return redirect('/')
     return render_template('create_post.html', title='New Post',
-                            form=form, legend='New Post')
+                           form=form, legend='New Post')
+
 
 @app.route("/post/<int:post_id>")
 def post(post_id):
     #post = Post.query.get_or_404(post_id)
     return render_template('post.html', title=post.title, post=post)
+
 
 @app.route("/post/<int:post_id>/update", methods=['GET', 'POST'])
 @login_required
@@ -125,8 +129,9 @@ def update_post(post_id):
     elif request.method == 'GET':
         form.title.data = post.title
         form.content.data = post.content
-    return render_template('create_post.html', title='Update Post', 
-                            form=form, legend='Update Post')
+    return render_template('create_post.html', title='Update Post',
+                           form=form, legend='Update Post')
+
 
 @app.route("/post/<int:post_id>/delete", methods=['POST'])
 @login_required
@@ -139,11 +144,12 @@ def delete_post(post_id):
     flash('Your post has been deleted!', 'success')
     return redirect('/')
 
+
 @app.route("/user/<string:username>")
 def user_posts(username):
     page = request.args.get('page', 1, type=int)
     user = User.query.filter_by(username=username).first_or_404()
-    #posts = Post.query.filter_by(author=user)\
+    # posts = Post.query.filter_by(author=user)\
     #    .order_by(Post.date_posted.desc())\
-        #.paginate(page=page, per_page=5)
-    #return render_template('user_post.html', posts=posts, user=user)
+    # .paginate(page=page, per_page=5)
+    # return render_template('user_post.html', posts=posts, user=user)
