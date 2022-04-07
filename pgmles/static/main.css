@@ -78,3 +78,67 @@ a.article-title:hover {
 .account-heading {
   font-size: 2.5rem;
 }
+
+.calendar {
+  background-color: #fafafa;
+  width: 100%;
+  color: #818182;
+  border: #dddddd solid 1px;
+}
+
+.calendar .weekend {
+  background-color: #eee;
+}
+
+.calendar th {
+  border-bottom: #ddd solid 1px;
+}
+
+.calendar th, td {
+  /*border: #333 solid 1px;*/
+  text-align: center;
+  width: 100px;
+  position: relative;
+}
+
+.calendar .lesson {
+  background: rgb(84, 230, 84);
+  border: #444 solid 1px;
+  color: #444
+}
+
+.calendar td .hover-day {
+  visibility: hidden;
+  background-color: #444;
+  color: #eee;
+  text-align: center;
+  border-radius: 6px;
+  padding: 5px 0;
+
+  width: 120px;
+  bottom: 100%;
+  left: 50%;
+  margin-left: -60px; /* Use half of the width (120/2 = 60), to center the tooltip */
+  padding: 5px 0;
+  
+
+  /* Position the tooltip */
+  position: absolute;
+  z-index: 1;
+}
+
+.calendar td .hover-day::after {
+  content: "";
+  position: absolute;
+  top: 100%;
+  left: 50%;
+  margin-left: -5px;
+  border-width: 5px;
+  border-style: solid;
+  border-color: #444 transparent transparent transparent;
+}
+
+
+.calendar td:hover .hover-day {
+  visibility: visible;
+}

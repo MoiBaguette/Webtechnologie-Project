@@ -5,7 +5,7 @@ from flask import abort, flash, redirect, render_template, request, url_for
 from flask_login import current_user, login_required, login_user, logout_user
 from PIL import Image
 
-from . import app, bcrypt, db
+from . import app, bcrypt, calendar, db
 from .forms import LoginForm, PostForm, RegistrationForm, UpdateAccountForm
 from .models import Classes, Language, User
 
@@ -14,12 +14,12 @@ from .models import Classes, Language, User
 def index():
     page = request.args.get('page', 1, type=int)
     languages = Language.query.all()
-    return render_template('index.html', languages=languages)
+    return render_template('index.html', calendar=calendar, languages=languages)
 
 
 @app.route("/about")
 def about():
-    return render_template('about.html', title='About')
+    return render_template('about.html', calendar=calendar, title='About')
 
 
 @app.route("/register", methods=['GET', 'POST'])
@@ -28,13 +28,15 @@ def register():
         return redirect('/')
     form = RegistrationForm()
     if form.validate_on_submit():
-        hashed_password = bcrypt.generate_password_hash(form.password.data).decode('utf-8')
-        user = User(username=form.username.data, email=form.email.data, password=hashed_password)
+        hashed_password = bcrypt.generate_password_hash(
+            form.password.data).decode('utf-8')
+        user = User(username=form.username.data,
+                    email=form.email.data, password=hashed_password)
         db.session.add(user)
         db.session.commit()
         flash('Your account has been created! You are now able to log in', 'success')
         return redirect(url_for('login'))
-    return render_template('register.html', title='Register', form=form)
+    return render_template('register.html', calendar=calendar, title='Register', form=form)
 
 
 @app.route("/login", methods=['GET', 'POST'])
@@ -50,7 +52,7 @@ def login():
             return redirect(next_page) if next_page else redirect('/')
         else:
             flash('Login Unsuccessful. Please check email and password', 'danger')
-    return render_template('login.html', title='Login', form=form)
+    return render_template('login.html', calendar=calendar, title='Login', form=form)
 
 
 @app.route("/logout")
@@ -63,7 +65,8 @@ def save_picture(form_picture):
     random_hex = secrets.token_hex(8)
     _, f_ext = os.path.splitext(form_picture.filename)
     picture_fn = random_hex + f_ext
-    picturepath = os.path.join(app.root_path, 'static/profile_pics', picture_fn)
+    picturepath = os.path.join(
+        app.root_path, 'static/profile_pics', picture_fn)
 
     output_size = (125, 125)
     i = Image.open(form_picture)
@@ -89,8 +92,9 @@ def account():
     elif request.method == 'GET':
         form.username.data = current_user.username
         form.email.data = current_user.email
-    image_file = url_for('static', filename='profile_pics/' + current_user.image_file)
-    return render_template('account.html', title='Account', image_file=image_file, form=form)
+    image_file = url_for(
+        'static', filename='profile_pics/' + current_user.image_file)
+    return render_template('account.html', calendar=calendar, title='Account', image_file=image_file, form=form)
 
 
 @app.route("/post/new", methods=['GET', 'POST'])
@@ -103,14 +107,14 @@ def new_post():
         db.session.commit()
         flash('Your post has been created!', 'success')
         return redirect('/')
-    return render_template('create_post.html', title='New Post',
+    return render_template('create_post.html', calendar=calendar, title='New Post',
                            form=form, legend='New Post')
 
 
 @app.route("/post/<int:post_id>")
 def post(post_id):
     #post = Post.query.get_or_404(post_id)
-    return render_template('post.html', title=post.title, post=post)
+    return render_template('post.html', calendar=calendar, title=post.title, post=post)
 
 
 @app.route("/post/<int:post_id>/update", methods=['GET', 'POST'])
@@ -129,7 +133,7 @@ def update_post(post_id):
     elif request.method == 'GET':
         form.title.data = post.title
         form.content.data = post.content
-    return render_template('create_post.html', title='Update Post',
+    return render_template('create_post.html', calendar=calendar, title='Update Post',
                            form=form, legend='Update Post')
 
 

@@ -69,6 +69,23 @@
                 <li class="list-group-item list-group-item-light">etc</li>
               </ul>
             </p>
+            <table class='calendar'>
+              <tr>
+                {% for d, day in calendar.weekdays %}
+                  <th class="{{ 'weekend' if d >= 5 }}">{{ day }}</th>
+                {% endfor %}
+              </tr>
+              {% for row in calendar.rows %}
+                <tr>
+                  {% for d, day, lesson in row %}
+                      <td class="{{ 'weekend' if d >= 5 }} {{ 'lesson' if lesson }}">
+                        {{ day if day }}
+                        {% if lesson %}<span class='hover-day'>{{ lesson }}</span>{% endif %}
+                      </td>
+                  {% endfor %}
+                </tr>
+             {% endfor %}
+            </table>
           </div>
         </div>
       </div>
