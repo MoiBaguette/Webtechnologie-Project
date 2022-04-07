@@ -76,7 +76,7 @@ class SubscribeForm(FlaskForm):
 
 class UnsubscribeForm(FlaskForm):
     lang_id = HiddenField()
-    submit = SubmitField('Unsubsribe')
+    submit = SubmitField('Unsubscribe')
 
 
 class PostForm(FlaskForm):  # redundant
