@@ -1,3 +1,5 @@
+from datetime import datetime
+
 from flask_login import UserMixin
 
 from . import db, login_manager
@@ -37,7 +39,7 @@ class Classes(db.Model):
         'language.id'), nullable=False)
     teacher_id = db.Column(
         db.Integer, db.ForeignKey('user.id'), nullable=False)
-    start = db.Column(db.DateTime, nullable=False)
+    start = db.Column(db.DateTime, nullable=False, default=datetime.utcnow)
     location = db.Column(db.String(120), nullable=False)
 
     def __repr__(self):
