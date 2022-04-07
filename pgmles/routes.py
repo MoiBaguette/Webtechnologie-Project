@@ -8,7 +8,7 @@ from PIL import Image
 from . import app, bcrypt, calendar, db
 from .forms import (LanguageForm, LoginForm, PostForm, RegistrationForm,
                     SubscribeForm, UnsubscribeForm, UpdateAccountForm)
-from .models import Classes, Language, User
+from .models import Course, CourseMember, User
 
 
 @app.route("/")
@@ -16,12 +16,11 @@ def index():
     courses = Course.query.all()
     subscriptions = []
     if current_user.is_authenticated:
-        members = CourseMember.query.filter_by(user_id=current_user.id)
-        subscriptions = [Course.query.filter_by(
-            id=cm.course_id) for cm in members]
+        subscriptions = [cm.course_id for cm in CourseMember.query.filter_by(
+            user_id=current_user.id)]
 #        for coursemember in members:
 #            course = Course
-    return render_template('index.html', calendar=calendar, courses=courses, subs=subscriptions, subscribed="subscribed")
+    return render_template('index.html', calendar=calendar, courses=courses, subs=subscriptions)
 
 
 @app.route("/about")
@@ -104,39 +103,25 @@ def account():
     return render_template('account.html', calendar=calendar, title='Account', image_file=image_file, form=form)
 
 
-@app.route("/post/new", methods=['GET', 'POST'])
-@login_required
-def new_post():
-    form = PostForm()
-    if form.validate_on_submit():
-        #post = Post(title=form.title.data, content=form.content.data, author=current_user)
-        db.session.add(post)
-        db.session.commit()
-        flash('Your post has been created!', 'success')
-        return redirect('/')
-    return render_template('create_post.html', calendar=calendar, title='New Post',
-                           form=form, legend='New Post')
-
-
 @app.route("/admin")
 def admin():
-    languages = Language.query.all()
-    return render_template('admin.html', calendar=calendar, title='Administration Page', languages=languages)
+    courses = Course.query.all()
+    return render_template('admin.html', calendar=calendar, title='Administration Page', courses=courses)
 
 
-@app.route("/admin/update/<int:lang_id>", methods=['GET', 'POST'])
-def update_lang(lang_id):
+@app.route("/admin/update/<int:course_id>", methods=['GET', 'POST'])
+def update_lang(course_id):
     form = LanguageForm()
-    lang = Language.query.get_or_404(lang_id)
+    course = Course.query.get_or_404(course_id)
     if form.validate_on_submit():
-        lang.name = form.name.data
-        lang.info = form.info.data
+        course.name = form.name.data
+        course.description = form.info.data
         db.session.commit()
         flash('The course has been updated!', 'success')
-        return redirect(url_for('index', lang_id=lang.id))
+        return redirect(url_for('admin'))
     elif request.method == 'GET':
-        form.name.data = lang.name
-        form.info.data = lang.info
+        form.name.data = course.name
+        form.info.data = course.description
     return render_template('update_lang.html', calendar=calendar, form=form, legend='Update Language')
 
 
@@ -144,63 +129,23 @@ def update_lang(lang_id):
 def course(course_id):
     form = SubscribeForm()
     form2 = UnsubscribeForm()
-    subscription = None
+    subscribed = None
     if current_user.is_authenticated:
-        subscription = Classes.query.filter_by(
-            user_id=current_user.id, language_id=course_id).first()
+        subscribed = CourseMember.query.filter_by(
+            user_id=current_user.id, course_id=course_id).first()
 
-    if form.validate_on_submit() and not subscription:
-        course = Classes(user_id=current_user.id,
-                         language_id=course_id, teacher_id=1, location="hier")
+    if form.validate_on_submit() and not subscribed:
+        course = CourseMember(user_id=current_user.id, course_id=course_id)
         db.session.add(course)
         db.session.commit()
         flash('You have subscribed to this course!', 'success')
         return redirect(url_for('account'))
 
-    if form2.validate_on_submit() and subscription:
-        db.session.delete(subscription)
+    if form2.validate_on_submit() and subscribed:
+        db.session.delete(subscribed)
         db.session.commit()
         flash('You been have Unsubscribed to this course!', 'success')
         return redirect(url_for('account'))
 
-    course = Language.query.get_or_404(course_id)
-    return render_template('course.html', calendar=calendar, title=course.name, course=course, form=form, form2=form2, show=not subscription)
-
-
-@app.route("/course/<int:post_id>/update", methods=['GET', 'POST'])
-@login_required
-def update_post(post_id):
-    form = PostForm()
-    if form.validate_on_submit():
-        post.title = form.title.data
-        post.content = form.content.data
-        db.session.commit()
-        flash('Your post has been updated!', 'success')
-        return redirect(url_for('post', post_id=post.id))
-    elif request.method == 'GET':
-        form.title.data = post.title
-        form.content.data = post.content
-    return render_template('create_post.html', calendar=calendar, title='Update Post',
-                           form=form, legend='Update Post')
-
-
-@app.route("/post/<int:post_id>/delete", methods=['POST'])
-@login_required
-def delete_post(post_id):
-    #post = Post.query.get_or_404(post_id)
-    if post.author != current_user:
-        abort(403)
-    db.session.delete(post)
-    db.session.commit()
-    flash('Your post has been deleted!', 'success')
-    return redirect('/')
-
-
-@app.route("/user/<string:username>")
-def user_posts(username):
-    page = request.args.get('page', 1, type=int)
-    user = User.query.filter_by(username=username).first_or_404()
-    # posts = Post.query.filter_by(author=user)\
-    #    .order_by(Post.date_posted.desc())\
-    # .paginate(page=page, per_page=5)
-    # return render_template('user_post.html', posts=posts, user=user)
+    course = Course.query.get_or_404(course_id)
+    return render_template('course.html', calendar=calendar, title=course.name, course=course, form=form, form2=form2, show=not subscribed)

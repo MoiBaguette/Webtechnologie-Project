@@ -1,10 +1,13 @@
 {% extends "layout.html" %}
 {% block content %}
-    {% for language in languages %}
+    {% for course in courses %}
         <article class="media content-section">
           <div class="media-body">
-            <h2><a class="article-title" href="{{url_for('course', course_id=language.id)}}">{{language.name}} {%if language.id in subs%}({{subscribed}}){%endif%}</a></h2>
-            <p> {{language.info}}</p>
+            <h2><a class="article-title" href="{{url_for('course', course_id=course.id)}}">
+              {{course.name}} 
+              {% if course.id in subs %}(subscribed){% endif %}
+            </a></h2>
+            <p> {{course.description}}</p>
           </div>
         </article>
     {% endfor %}
