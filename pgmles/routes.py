@@ -6,8 +6,8 @@ from flask_login import current_user, login_required, login_user, logout_user
 from PIL import Image
 
 from . import app, bcrypt, calendar, db
-from .forms import (LoginForm, PostForm, RegistrationForm, SubscribeForm,
-                    UnsubscribeForm, UpdateAccountForm)
+from .forms import (LanguageForm, LoginForm, PostForm, RegistrationForm,
+                    SubscribeForm, UnsubscribeForm, UpdateAccountForm)
 from .models import Classes, Language, User
 
 
@@ -130,7 +130,7 @@ def update_lang(lang_id):
         lang.info = form.info.data
         db.session.commit()
         flash('The course has been updated!', 'success')
-        return redirect(url_for('home', lang_id=lang.id))
+        return redirect(url_for('index', lang_id=lang.id))
     elif request.method == 'GET':
         form.name.data = lang.name
         form.info.data = lang.info
