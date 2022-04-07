@@ -3,7 +3,7 @@
     {% for language in languages %}
         <article class="media content-section">
           <div class="media-body">
-            <h2><a class="article-title" href="{{url_for('course', course_id=language.id)}}">{{language.name}}</a></h2>
+            <h2><a class="article-title" href="{{url_for('course', course_id=language.id)}}">{{language.name}} {%if language.id in subs%}({{subscribed}}){%endif%}</a></h2>
             <p> {{language.info}}</p>
           </div>
         </article>

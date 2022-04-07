@@ -7,9 +7,21 @@
         </div>
         <div class="article-metadata">
             {% if current_user.is_authenticated %}
-                <div>
-                    <a class="btn btn-secondary btn-sm mt-1 mb-1" href="{{url_for('course', course_id=course.id)}}">Sign Up</a>
-                </div>
+                {% if show %}
+                <form method="POST" action="">
+                    {{ form.hidden_tag() }}
+                    <div class="form-group">
+                        {{ form.submit(class="btn btn-outline-info") }}
+                    </div>
+                </form>
+                {%else%}
+                <form method="POST" action="">
+                    {{ form2.hidden_tag() }}
+                    <div class="form-group">
+                        {{ form2.submit(class="btn btn-outline-info") }}
+                    </div>
+                </form>
+                {%endif%}
             {% else %}
                 <p> Please Log in to subscribe to course</p>
             {% endif %}

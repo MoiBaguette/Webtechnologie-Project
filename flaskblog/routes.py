@@ -3,7 +3,7 @@ import secrets
 from PIL import Image
 from flask import render_template, url_for, flash, redirect, request, abort
 from flaskblog import app, db, bcrypt
-from flaskblog.forms import RegistrationForm, LoginForm, UpdateAccountForm, PostForm
+from flaskblog.forms import RegistrationForm, LoginForm, UpdateAccountForm, LanguageForm, PostForm, SubscribeForm, UnsubscribeForm
 from flaskblog.models import User, Language, Classes
 from flask_login import login_user, current_user, logout_user, login_required
 
@@ -13,7 +13,11 @@ from flask_login import login_user, current_user, logout_user, login_required
 def home():
     page = request.args.get('page', 1, type=int)
     languages = Language.query.all()
-    return render_template('home.html', languages=languages)
+    subs = Classes.query.filter_by(user_id=current_user.id)
+    lijst = []
+    for sub in subs:
+        lijst.append(sub.language_id)
+    return render_template('home.html', languages=languages, subs=lijst, subscribed="subscribed")
 
 
 @app.route("/about")
@@ -102,17 +106,51 @@ def new_post():
     return render_template('create_post.html', title='New Post',
                             form=form, legend='New Post')
 
-@app.route("/course/<int:course_id>")
-def course(course_id):
-    course = Language.query.get_or_404(course_id)
-    return render_template('course.html', title=course.name, course=course)
+@app.route("/admin")
+def admin():
+    languages = Language.query.all()
+    return render_template('admin.html', title = 'Administration Page', languages = languages)
 
-@app.route("/post/<int:post_id>/update", methods=['GET', 'POST'])
+@app.route("/admin/update/<int:lang_id>", methods=['GET', 'POST'])
+def update_lang(lang_id):
+    form = LanguageForm()
+    lang = Language.query.get_or_404(lang_id)
+    if form.validate_on_submit():
+        lang.name = form.name.data
+        lang.info = form.info.data
+        db.session.commit()
+        flash('The course has been updated!', 'success')
+        return redirect(url_for('home', lang_id=lang.id))
+    elif request.method == 'GET':
+        form.name.data = lang.name
+        form.info.data = lang.info
+    return render_template('update_lang.html', form=form, legend='Update Language')
+
+@app.route("/course/<int:course_id>", methods=['GET', 'POST']) 
+def course(course_id):
+    form = SubscribeForm()
+    form2 = UnsubscribeForm()
+    subscription = Classes.query.filter_by(user_id=current_user.id, language_id=course_id).first()
+    show = True
+    if subscription:
+        show = False
+    if form.validate_on_submit() and show == True:
+        course = Classes(user_id = current_user.id, language_id = course_id, teacher_id = 1, location = "hier")
+        db.session.add(course)
+        db.session.commit()
+        flash('You have subscribed to this course!', 'success')
+        return redirect(url_for('account'))
+    if form2.validate_on_submit() and show == False:
+        db.session.delete(subscription)
+        db.session.commit()
+        flash('You been have Unsubscribed to this course!', 'success')
+        return redirect(url_for('account'))
+    course = Language.query.get_or_404(course_id)
+    return render_template('course.html', title=course.name, course=course, form=form, form2=form2, show=show)
+
+@app.route("/course/<int:post_id>/update", methods=['GET', 'POST'])
 @login_required
 def update_post(post_id):
-    #post = Post.query.get_or_404(post_id)
-    if post.author != current_user:
-        abort(403)
     form = PostForm()
     if form.validate_on_submit():
         post.title = form.title.data
