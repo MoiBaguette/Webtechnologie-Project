@@ -6,7 +6,8 @@ from flask_login import current_user, login_required, login_user, logout_user
 from PIL import Image
 
 from . import app, bcrypt, calendar, db
-from .forms import LoginForm, PostForm, RegistrationForm, UpdateAccountForm
+from .forms import (LoginForm, PostForm, RegistrationForm, SubscribeForm,
+                    UnsubscribeForm, UpdateAccountForm)
 from .models import Classes, Language, User
 
 
@@ -140,25 +141,27 @@ def update_lang(lang_id):
 def course(course_id):
     form = SubscribeForm()
     form2 = UnsubscribeForm()
-    subscription = Classes.query.filter_by(
-        user_id=current_user.id, language_id=course_id).first()
-    show = True
-    if subscription:
-        show = False
-    if form.validate_on_submit() and show == True:
+    subscription = None
+    if current_user.is_authenticated:
+        subscription = Classes.query.filter_by(
+            user_id=current_user.id, language_id=course_id).first()
+
+    if form.validate_on_submit() and not subscription:
         course = Classes(user_id=current_user.id,
                          language_id=course_id, teacher_id=1, location="hier")
         db.session.add(course)
         db.session.commit()
         flash('You have subscribed to this course!', 'success')
         return redirect(url_for('account'))
-    if form2.validate_on_submit() and show == False:
+
+    if form2.validate_on_submit() and subscription:
         db.session.delete(subscription)
         db.session.commit()
         flash('You been have Unsubscribed to this course!', 'success')
         return redirect(url_for('account'))
+
     course = Language.query.get_or_404(course_id)
-    return render_template('course.html', calendar=calendar, title=course.name, course=course, form=form, form2=form2, show=show)
+    return render_template('course.html', calendar=calendar, title=course.name, course=course, form=form, form2=form2, show=not subscription)
 
 
 @app.route("/course/<int:post_id>/update", methods=['GET', 'POST'])
