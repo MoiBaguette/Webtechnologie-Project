@@ -7,17 +7,20 @@ from PIL import Image
 
 from . import app, bcrypt, calendar, db
 from .forms import LoginForm, PostForm, RegistrationForm, UpdateAccountForm
-from .models import Classes, Language, User
+from .models import Course, CourseMember, User
 
 
 @app.route("/")
 def index():
-    languages = Language.query.all()
-    lijst = []
+    courses = Course.query.all()
+    subscriptions = []
     if current_user.is_authenticated:
-        subs = Classes.query.filter_by(user_id=current_user.id)
-        lijst = [sub.language_id for sub in subs]
-    return render_template('index.html', calendar=calendar, languages=languages, subs=lijst, subscribed="subscribed")
+        members = CourseMember.query.filter_by(user_id=current_user.id)
+        subscriptions = [Course.query.filter_by(
+            id=cm.course_id) for cm in members]
+#        for coursemember in members:
+#            course = Course
+    return render_template('index.html', calendar=calendar, courses=courses, subs=subscriptions, subscribed="subscribed")
 
 
 @app.route("/about")

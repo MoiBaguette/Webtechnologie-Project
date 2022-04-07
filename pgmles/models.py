@@ -23,28 +23,26 @@ class User(db.Model, UserMixin):
         return f"User('{self.username}', '{self.email}', '{self.image_file}')"
 
 
-class Language(db.Model):
+class Course(db.Model):
     id = db.Column(db.Integer, primary_key=True)
     name = db.Column(db.String(100), nullable=False)
-    info = db.Column(db.Text)
-
-    def __repr__(self):
-        return f"Language('{self.name}', '{self.info}')"
-
-
-class Classes(db.Model):
-    id = db.Column(db.Integer, primary_key=True)
-    user_id = db.Column(db.Integer, db.ForeignKey('user.id'), nullable=False)
-    language_id = db.Column(db.Integer, db.ForeignKey(
-        'language.id'), nullable=False)
+    description = db.Column(db.Text, nullable=False)
     teacher_id = db.Column(
         db.Integer, db.ForeignKey('user.id'), nullable=False)
-    start = db.Column(db.DateTime, nullable=False, default=datetime.utcnow)
+    weekday = db.Column(db.Integer, nullable=False)
+    start = db.Column(db.String(10), nullable=False, default=datetime.utcnow)
+    end = db.Column(db.String(10), nullable=False, default=datetime.utcnow)
     location = db.Column(db.String(120), nullable=False)
 
     def __repr__(self):
-        return f"Language('{self.id}', '{self.language_id}', '{self.start}', '{self.location}')"
+        return f"Course('{self.id}', '{self.name}', '{self.description}')"
 
+
+class CourseMember(db.Model):
+    id = db.Column(db.Integer, primary_key=True)
+    course_id = db.Column(db.Integer, db.ForeignKey(
+        'course.id'), nullable=False)
+    user_id = db.Column(db.Integer, db.ForeignKey('user.id'), nullable=False)
 
 # date_posted = db.Column(db.DateTime, nullable=False, default=datetime.utcnow)
 # content = db.Column(db.Text, nullable=False)
