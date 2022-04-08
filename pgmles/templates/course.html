@@ -2,8 +2,21 @@
 {% block content %}
     <article class="media content-section">
         <div class="media-body">
-            <h2><a class="article-title" href="{{ url_for('course', course_id=course.id)}}">{{ course.name }}</a></h2>
-            <p class="article-content">{{ course.description }}</p>
+            <h2><a class="article-title" href="{{url_for('course', course_id=course.id)}}">
+              {{course.name}} 
+              {% if course.id in subs %}(subscribed){% endif %}
+            </a></h2>
+            <p> {{course.description}}</p>
+            <p>De Cursus {{course.name}} wordt gegeven door
+              {%for x in teachers%}
+                {%if x[0] == course.teacher_id%}
+                  {{x[1]}}
+                {%else%}
+                  Missing Data
+                {%endif%}
+              {%endfor%}
+            </p>
+            <p>Start elke {{course.weekday}} vanaf {{course.start}} tot {{course.end}} op locatie: {{course.location}}</p>
         </div>
         <div class="article-metadata">
             {% if current_user.is_authenticated %}

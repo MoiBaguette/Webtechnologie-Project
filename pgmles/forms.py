@@ -2,7 +2,7 @@ from flask_login import current_user
 from flask_wtf import FlaskForm
 from flask_wtf.file import FileAllowed, FileField
 from wtforms import (BooleanField, HiddenField, PasswordField, StringField,
-                     SubmitField, TextAreaField)
+                     SubmitField, TextAreaField, SelectField)
 from wtforms.validators import (DataRequired, Email, EqualTo, Length,
                                 ValidationError)
 
@@ -67,6 +67,18 @@ class LanguageForm(FlaskForm):
     name = StringField('Name', validators=[DataRequired()])
     info = TextAreaField('Info', validators=[DataRequired()])
     submit = SubmitField('Update')
+
+class NewCourseForm(FlaskForm):
+    name = StringField('Title', validators=[
+                           DataRequired(), Length(min=1, max=100)])
+    description = TextAreaField('Description', validators=[DataRequired()])
+    teacher_id = SelectField('Teacher', validators=[DataRequired()], coerce=int)
+    weekday = StringField('Weekday', validators=[DataRequired()])
+    start = StringField('Start', validators=[DataRequired()])
+    end = StringField('End', validators=[DataRequired()])
+    location = StringField('Location', validators=[
+                           DataRequired(), Length(min=1, max=100)])
+    submit = SubmitField('Add')
 
 
 class SubscribeForm(FlaskForm):

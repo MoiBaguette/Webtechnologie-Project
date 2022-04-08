@@ -7,7 +7,7 @@ from PIL import Image
 
 from . import app, bcrypt, calendar, db
 from .forms import (LanguageForm, LoginForm, PostForm, RegistrationForm,
-                    SubscribeForm, UnsubscribeForm, UpdateAccountForm)
+                    SubscribeForm, UnsubscribeForm, UpdateAccountForm, NewCourseForm)
 from .models import Course, CourseMember, User
 
 
@@ -15,12 +15,13 @@ from .models import Course, CourseMember, User
 def index():
     courses = Course.query.all()
     subscriptions = []
+    teachers = [[teacher.id, teacher.username] for teacher in User.query.filter_by(type='teacher')]
     if current_user.is_authenticated:
         subscriptions = [cm.course_id for cm in CourseMember.query.filter_by(
             user_id=current_user.id)]
 #        for coursemember in members:
-#            course = Course
-    return render_template('index.html', calendar=calendar, courses=courses, subs=subscriptions)
+#            course[] = Course.id
+    return render_template('index.html', calendar=calendar, courses=courses, subs=subscriptions, teachers=teachers)
 
 
 @app.route("/about")
@@ -108,20 +109,45 @@ def admin():
     courses = Course.query.all()
     return render_template('admin.html', calendar=calendar, title='Administration Page', courses=courses)
 
+@app.route("/admin/new_course", methods=['GET', 'POST'])
+def new_course():
+    form = NewCourseForm()
+    form.teacher_id.choices = [(g.id, g.username) for g in User.query.filter_by(type='teacher')]
+    if form.validate_on_submit():
+        course = Course(name=form.name.data, description=form.description.data,\
+                        teacher_id=form.teacher_id.data, weekday=form.weekday.data,\
+                        start=form.start.data, end=form.end.data, location=form.location.data)
+        db.session.add(course)
+        db.session.commit()
+        flash('The course has been created!', 'success')
+        return redirect(url_for('admin'))
+    return render_template('new_course.html', calendar=calendar, title='New Course', form=form)
+
 
 @app.route("/admin/update/<int:course_id>", methods=['GET', 'POST'])
 def update_lang(course_id):
-    form = LanguageForm()
+    form = NewCourseForm()
+    form.teacher_id.choices = [(g.id, g.username) for g in User.query.filter_by(type='teacher')]
     course = Course.query.get_or_404(course_id)
     if form.validate_on_submit():
         course.name = form.name.data
-        course.description = form.info.data
+        course.description = form.description.data
+        course.teacher_id = form.teacher_id.data
+        course.weekday = form.weekday.data
+        course.start = form.start.data
+        course.end = form.end.data
+        course.location = form.location.data
         db.session.commit()
         flash('The course has been updated!', 'success')
         return redirect(url_for('admin'))
     elif request.method == 'GET':
         form.name.data = course.name
-        form.info.data = course.description
+        form.description.data = course.description
+        form.teacher_id.data = course.teacher_id
+        form.weekday.data = course.weekday
+        form.start.data = course.start
+        form.end.data = course.end
+        form.location.data = course.location
     return render_template('update_lang.html', calendar=calendar, form=form, legend='Update Language')
 
 
@@ -129,6 +155,7 @@ def update_lang(course_id):
 def course(course_id):
     form = SubscribeForm()
     form2 = UnsubscribeForm()
+    teachers = [[teacher.id, teacher.username] for teacher in User.query.filter_by(type='teacher')]
     subscribed = None
     if current_user.is_authenticated:
         subscribed = CourseMember.query.filter_by(
@@ -148,4 +175,11 @@ def course(course_id):
         return redirect(url_for('account'))
 
     course = Course.query.get_or_404(course_id)
-    return render_template('course.html', calendar=calendar, title=course.name, course=course, form=form, form2=form2, show=not subscribed)
+    return render_template('course.html', calendar=calendar, title=course.name, course=course, form=form, form2=form2, show=not subscribed, teachers=teachers)
+
+@app.route("/delete_course/<int:course_id>", methods=['GET','POST'])
+def delete_course(course_id):
+    course = Course.query.get_or_404(course_id)
+    db.session.delete(course)
+    db.session.commit()
+    return redirect(url_for('index'))
