@@ -11,8 +11,6 @@
               {%for x in teachers%}
                 {%if x[0] == course.teacher_id%}
                   {{x[1]}}
-                {%else%}
-                  Missing Data
                 {%endif%}
               {%endfor%}
             </p>
