@@ -5,7 +5,7 @@ from flask import flash, redirect, render_template, request, url_for
 from flask_login import current_user, login_required, login_user, logout_user
 from PIL import Image
 
-from . import app, bcrypt, calendar, db
+from .server import app, bcrypt, calendar, db
 from .forms import LoginForm, NewCourseForm, RegistrationForm, SubscribeForm, UnsubscribeForm, UpdateAccountForm
 from .models import Course, CourseMember, User
 

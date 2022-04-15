@@ -8,7 +8,7 @@ lessons = [ None ] * 31
 
 
 class Calendar:
-    weekdays = list(enumerate(['Ma', 'Di', 'Wo', 'Do', 'Vr', 'Za', 'Zo']))
+    weekdays = enumerate(['Ma', 'Di', 'Wo', 'Do', 'Vr', 'Za', 'Zo'])
     nextlesson = ''
     rows = []
 

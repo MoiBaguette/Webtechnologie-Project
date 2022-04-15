@@ -1,4 +1,4 @@
-from pgmles import app
+from pgmles.server import app
 
 if __name__ == '__main__':
     app.run(debug=True)
