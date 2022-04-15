@@ -15,8 +15,7 @@ class User(db.Model, UserMixin):
     type = db.Column(db.String(6), nullable=False, default="client")
     username = db.Column(db.String(20), unique=True, nullable=False)
     email = db.Column(db.String(120), unique=True, nullable=False)
-    image_file = db.Column(db.String(20), nullable=False,
-                           default='default.jpg')
+    image_file = db.Column(db.String(20), nullable=False, default='default.jpg')
     password = db.Column(db.String(60), nullable=False)
 
     def __repr__(self):
@@ -27,8 +26,7 @@ class Course(db.Model):
     id = db.Column(db.Integer, primary_key=True)
     name = db.Column(db.String(100), nullable=False)
     description = db.Column(db.Text, nullable=False)
-    teacher_id = db.Column(
-        db.Integer, db.ForeignKey('user.id'), nullable=False)
+    teacher_id = db.Column(db.Integer, db.ForeignKey('user.id'), nullable=False)
     weekday = db.Column(db.Integer, nullable=False)
     start = db.Column(db.String(10), nullable=False, default=datetime.utcnow)
     end = db.Column(db.String(10), nullable=False, default=datetime.utcnow)
@@ -40,10 +38,5 @@ class Course(db.Model):
 
 class CourseMember(db.Model):
     id = db.Column(db.Integer, primary_key=True)
-    course_id = db.Column(db.Integer, db.ForeignKey(
-        'course.id'), nullable=False)
+    course_id = db.Column(db.Integer, db.ForeignKey('course.id'), nullable=False)
     user_id = db.Column(db.Integer, db.ForeignKey('user.id'), nullable=False)
-
-# date_posted = db.Column(db.DateTime, nullable=False, default=datetime.utcnow)
-# content = db.Column(db.Text, nullable=False)
-# user_id = db.Column(db.Integer, db.ForeignKey('user.id'), nullable=False)

@@ -3,19 +3,17 @@
     <article class="media content-section">
         <div class="media-body">
             <h2><a class="article-title" href="{{url_for('course', course_id=course.id)}}">
-              {{course.name}} 
-              {% if course.id in subs %}(subscribed){% endif %}
+              {{ course.name }} 
+              {{ '(subscribed)' if course.id in subs }}
             </a></h2>
-            <p> {{course.description}}</p>
-            <p>De Cursus {{course.name}} wordt gegeven door
-              {%for x in teachers%}
-                {%if x[0] == course.teacher_id%}
-                  {{x[1]}}
-                {%endif%}
-              {%endfor%}
+            <p>{{course.description}}</p>
+            <p>De cursus <b>{{course.name}}</b> wordt gegeven door
+              {% for teacher in teachers %}
+                {{ teacher.username if teacher.id == course.teacher_id }}
+              {% endfor %}
             </p>
-            <p>Start elke {{course.weekday}} vanaf {{course.start}} tot {{course.end}} op locatie: {{course.location}}</p>
-        </div>
+            <p>Elke {{ ['maandag', 'dinsdag', 'woensdag', 'donderdag', 'vrijdag', 'zaterdag', 'zondag'][course.weekday] }}, {{ course.start }} uur t/m {{ course.end }} uur op locatie: {{ course.location }}</p>
+          </div>
         <div class="article-metadata">
             {% if current_user.is_authenticated %}
                 {% if show %}

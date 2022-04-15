@@ -1,16 +1,10 @@
-import enum
 import random
 from calendar import Calendar as Month
 from datetime import datetime
-from glob import glob
-from pydoc import doc
 
-from sqlalchemy import true
+lesson_names = [ 'Python', 'C', 'C++', 'Java', 'JavaScript', None, None, None, None, None, None, None, None ]
 
-lesson_names = ['Python', 'C', 'C++', 'Java',
-                'JavaScript', None, None, None, None, None, None, None, None]
-
-lessons = [None] * 31
+lessons = [ None ] * 31
 
 
 class Calendar:
@@ -35,4 +29,4 @@ class Calendar:
         for days in m.monthdayscalendar(today.year, today.month):
             self.rows.append([(i, d, lessons[d]) for i, d in enumerate(days)])
 
-        print(self.rows)
+#        print(self.rows)

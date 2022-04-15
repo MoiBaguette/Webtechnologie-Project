@@ -1,13 +1,12 @@
 import os
 import secrets
 
-from flask import abort, flash, redirect, render_template, request, url_for
+from flask import flash, redirect, render_template, request, url_for
 from flask_login import current_user, login_required, login_user, logout_user
 from PIL import Image
 
 from . import app, bcrypt, calendar, db
-from .forms import (LanguageForm, LoginForm, PostForm, RegistrationForm,
-                    SubscribeForm, UnsubscribeForm, UpdateAccountForm, NewCourseForm)
+from .forms import LoginForm, NewCourseForm, RegistrationForm, SubscribeForm, UnsubscribeForm, UpdateAccountForm
 from .models import Course, CourseMember, User
 
 
@@ -15,19 +14,14 @@ from .models import Course, CourseMember, User
 def index():
     courses = Course.query.all()
     subscriptions = []
-    teachers = [[teacher.id, teacher.username] for teacher in User.query.filter_by(type='teacher')]
+    teachers = User.query.filter_by(type='teacher')
     if current_user.is_authenticated:
-        subscriptions = [cm.course_id for cm in CourseMember.query.filter_by(
-            user_id=current_user.id)]
-#        for coursemember in members:
-#            course[] = Course.id
+        subscriptions = [ cm.course_id for cm in CourseMember.query.filter_by(user_id=current_user.id) ]
     return render_template('index.html', calendar=calendar, courses=courses, subs=subscriptions, teachers=teachers)
-
 
 @app.route("/about")
 def about():
     return render_template('about.html', calendar=calendar, title='About')
-
 
 @app.route("/register", methods=['GET', 'POST'])
 def register():
@@ -35,10 +29,8 @@ def register():
         return redirect('/')
     form = RegistrationForm()
     if form.validate_on_submit():
-        hashed_password = bcrypt.generate_password_hash(
-            form.password.data).decode('utf-8')
-        user = User(username=form.username.data,
-                    email=form.email.data, password=hashed_password)
+        hashed_password = bcrypt.generate_password_hash(form.password.data).decode('utf-8')
+        user = User(username=form.username.data, email=form.email.data, password=hashed_password)
         db.session.add(user)
         db.session.commit()
         flash('Your account has been created! You are now able to log in', 'success')
@@ -56,24 +48,21 @@ def login():
         if user and bcrypt.check_password_hash(user.password, form.password.data):
             login_user(user, remember=form.remember.data)
             next_page = request.args.get('next')
-            return redirect(next_page) if next_page else redirect('/')
+            return redirect(next_page if next_page else '/')
         else:
             flash('Login Unsuccessful. Please check email and password', 'danger')
     return render_template('login.html', calendar=calendar, title='Login', form=form)
-
 
 @app.route("/logout")
 def logout():
     logout_user()
     return redirect('/')
 
-
 def save_picture(form_picture):
     random_hex = secrets.token_hex(8)
     _, f_ext = os.path.splitext(form_picture.filename)
     picture_fn = random_hex + f_ext
-    picturepath = os.path.join(
-        app.root_path, 'static/profile_pics', picture_fn)
+    picturepath = os.path.join(app.root_path, 'static/profile_pics', picture_fn)
 
     output_size = (125, 125)
     i = Image.open(form_picture)
@@ -82,8 +71,7 @@ def save_picture(form_picture):
 
     return picture_fn
 
-
-@app.route("/account", methods=['GET', 'POST'])
+@app.route("/account", methods=[ 'GET', 'POST' ])
 @login_required
 def account():
     form = UpdateAccountForm()
@@ -99,35 +87,31 @@ def account():
     elif request.method == 'GET':
         form.username.data = current_user.username
         form.email.data = current_user.email
-    image_file = url_for(
-        'static', filename='profile_pics/' + current_user.image_file)
+    image_file = url_for('static', filename='profile_pics/' + current_user.image_file)
     return render_template('account.html', calendar=calendar, title='Account', image_file=image_file, form=form)
-
 
 @app.route("/admin")
 def admin():
     courses = Course.query.all()
     return render_template('admin.html', calendar=calendar, title='Administration Page', courses=courses)
 
-@app.route("/admin/new_course", methods=['GET', 'POST'])
+
+@app.route("/admin/new_course", methods=[ 'GET', 'POST' ])
 def new_course():
     form = NewCourseForm()
-    form.teacher_id.choices = [(g.id, g.username) for g in User.query.filter_by(type='teacher')]
+    form.teacher_id.choices = [ (g.id, g.username) for g in User.query.filter_by(type='teacher') ]
     if form.validate_on_submit():
-        course = Course(name=form.name.data, description=form.description.data,\
-                        teacher_id=form.teacher_id.data, weekday=form.weekday.data,\
-                        start=form.start.data, end=form.end.data, location=form.location.data)
+        course = Course(name=form.name.data, description=form.description.data, teacher_id=form.teacher_id.data, weekday=form.weekday.data, start=form.start.data, end=form.end.data, location=form.location.data)
         db.session.add(course)
         db.session.commit()
         flash('The course has been created!', 'success')
         return redirect(url_for('admin'))
     return render_template('new_course.html', calendar=calendar, title='New Course', form=form)
 
-
-@app.route("/admin/update/<int:course_id>", methods=['GET', 'POST'])
+@app.route("/admin/update/<int:course_id>", methods=[ 'GET', 'POST' ])
 def update_lang(course_id):
     form = NewCourseForm()
-    form.teacher_id.choices = [(g.id, g.username) for g in User.query.filter_by(type='teacher')]
+    form.teacher_id.choices = [ (g.id, g.username) for g in User.query.filter_by(type='teacher') ]
     course = Course.query.get_or_404(course_id)
     if form.validate_on_submit():
         course.name = form.name.data
@@ -148,18 +132,16 @@ def update_lang(course_id):
         form.start.data = course.start
         form.end.data = course.end
         form.location.data = course.location
-    return render_template('update_lang.html', calendar=calendar, form=form, legend='Update Language')
+    return render_template('update_course.html', calendar=calendar, form=form, legend='Update Language')
 
-
-@app.route("/course/<int:course_id>", methods=['GET', 'POST'])
+@app.route("/course/<int:course_id>", methods=[ 'GET', 'POST' ])
 def course(course_id):
     form = SubscribeForm()
     form2 = UnsubscribeForm()
-    teachers = [[teacher.id, teacher.username] for teacher in User.query.filter_by(type='teacher')]
+    teachers = User.query.filter_by(type='teacher')
     subscribed = None
     if current_user.is_authenticated:
-        subscribed = CourseMember.query.filter_by(
-            user_id=current_user.id, course_id=course_id).first()
+        subscribed = CourseMember.query.filter_by(user_id=current_user.id, course_id=course_id).first()
 
     if form.validate_on_submit() and not subscribed:
         course = CourseMember(user_id=current_user.id, course_id=course_id)
@@ -177,7 +159,7 @@ def course(course_id):
     course = Course.query.get_or_404(course_id)
     return render_template('course.html', calendar=calendar, title=course.name, course=course, form=form, form2=form2, show=not subscribed, teachers=teachers)
 
-@app.route("/delete_course/<int:course_id>", methods=['GET','POST'])
+@app.route("/delete_course/<int:course_id>", methods=['GET', 'POST'])
 def delete_course(course_id):
     course = Course.query.get_or_404(course_id)
     db.session.delete(course)
