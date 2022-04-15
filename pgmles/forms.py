@@ -95,3 +95,12 @@ class PostForm(FlaskForm):  # redundant
     title = StringField('Title', validators=[DataRequired()])
     content = TextAreaField('Content', validators=[DataRequired()])
     submit = SubmitField('Post')
+
+class SearchForm(FlaskForm):
+    username = StringField('Username', validators=[
+                           DataRequired(), Length(min=2, max=20)])
+    submit = SubmitField('Search')
+
+class PermissionForm(FlaskForm):
+    type = SelectField('Type',  choices=[('client', 'Klant'), ('teacher', 'Leraar'), ('admin', 'Administrator')])
+    submit = SubmitField('Update')

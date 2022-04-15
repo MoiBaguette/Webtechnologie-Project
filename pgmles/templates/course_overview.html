@@ -1,0 +1,15 @@
+{% extends "layout.html" %}
+{% block content %}
+{% for course in courses %}
+  {% if current_user.id == course.teacher_id%}
+    <article class="media content-section">
+      <div class="media-body">
+        <h2><a class="article-title" href="{{url_for('course', course_id=course.id)}}">{{course.name}}</a></h2>
+        <div>
+            <a class="btn btn-secondary btn-sm mt-1 mb-1" href="{{ url_for('update_course', course_id = course.id) }}">Update</a>
+        </div>
+      </div>
+    </article>
+  {% endif %}
+{% endfor %}
+{% endblock content %}

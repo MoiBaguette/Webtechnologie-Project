@@ -6,8 +6,7 @@ from flask_login import current_user, login_required, login_user, logout_user
 from PIL import Image
 
 from . import app, bcrypt, calendar, db
-from .forms import (LanguageForm, LoginForm, PostForm, RegistrationForm,
-                    SubscribeForm, UnsubscribeForm, UpdateAccountForm, NewCourseForm)
+from .forms import (LoginForm, RegistrationForm, SubscribeForm, UnsubscribeForm, UpdateAccountForm, NewCourseForm, SearchForm, PermissionForm)
 from .models import Course, CourseMember, User
 
 
@@ -104,13 +103,21 @@ def account():
     return render_template('account.html', calendar=calendar, title='Account', image_file=image_file, form=form)
 
 
-@app.route("/admin")
-def admin():
+@app.route("/course_overview")
+@login_required
+def course_overview():
+    if not(current_user.type == "admin" or current_user.type == "teacher"):
+        abort(403)
     courses = Course.query.all()
-    return render_template('admin.html', calendar=calendar, title='Administration Page', courses=courses)
+    type = current_user.type
+    return render_template('course_overview.html', calendar=calendar, title='Administration Page', courses=courses, type=type)
 
-@app.route("/admin/new_course", methods=['GET', 'POST'])
+
+@app.route("/course_overview/new_course", methods=['GET', 'POST'])
+@login_required
 def new_course():
+    if not(current_user.type == "admin" or current_user.type == "teacher"):
+        abort(403)
     form = NewCourseForm()
     form.teacher_id.choices = [(g.id, g.username) for g in User.query.filter_by(type='teacher')]
     if form.validate_on_submit():
@@ -124,8 +131,11 @@ def new_course():
     return render_template('new_course.html', calendar=calendar, title='New Course', form=form)
 
 
-@app.route("/admin/update/<int:course_id>", methods=['GET', 'POST'])
-def update_lang(course_id):
+@app.route("/course_overview/course_update/<int:course_id>", methods=['GET', 'POST'])
+@login_required
+def update_course(course_id):
+    if not(current_user.type == "admin" or current_user.type == "teacher"):
+        abort(403)
     form = NewCourseForm()
     form.teacher_id.choices = [(g.id, g.username) for g in User.query.filter_by(type='teacher')]
     course = Course.query.get_or_404(course_id)
@@ -139,7 +149,7 @@ def update_lang(course_id):
         course.location = form.location.data
         db.session.commit()
         flash('The course has been updated!', 'success')
-        return redirect(url_for('admin'))
+        return redirect(url_for('course_overview'))
     elif request.method == 'GET':
         form.name.data = course.name
         form.description.data = course.description
@@ -148,7 +158,7 @@ def update_lang(course_id):
         form.start.data = course.start
         form.end.data = course.end
         form.location.data = course.location
-    return render_template('update_lang.html', calendar=calendar, form=form, legend='Update Language')
+    return render_template('update_course.html', calendar=calendar, form=form, legend='Update Language')
 
 
 @app.route("/course/<int:course_id>", methods=['GET', 'POST'])
@@ -178,8 +188,52 @@ def course(course_id):
     return render_template('course.html', calendar=calendar, title=course.name, course=course, form=form, form2=form2, show=not subscribed, teachers=teachers)
 
 @app.route("/delete_course/<int:course_id>", methods=['GET','POST'])
+@login_required
 def delete_course(course_id):
+    if not(current_user.type == "admin"):
+        abort(403)
     course = Course.query.get_or_404(course_id)
     db.session.delete(course)
     db.session.commit()
     return redirect(url_for('index'))
+
+@app.route("/admin")
+@login_required
+def admin():
+    if not(current_user.type == "admin"):
+        abort(403)
+    courses = Course.query.all()
+    return render_template('admin.html', calendar=calendar, courses=courses)
+
+@app.route("/permissions", methods=['GET','POST'])
+@login_required
+def permissions():
+    if not(current_user.type == "admin"):
+        abort(403)
+    form = SearchForm()
+    if form.validate_on_submit():
+        user = User.query.filter_by(username=form.username.data).first()
+        if user == None:
+            flash(f'No user found in the database with username: {form.username.data}', 'danger')
+        else:
+            flash(f'Username found in the database with username: {form.username.data}', 'success')
+            return redirect(url_for('updatePermissions', user_id= user.id))
+    return render_template('permissions.html', calendar=calendar, form=form)
+
+@app.route("/permissions/update/<int:user_id>", methods=['GET','POST'])
+@login_required
+def updatePermissions(user_id):
+    if not(current_user.type == "admin"):
+        abort(403)
+    form = PermissionForm()
+    user = User.query.filter_by(id=user_id).first()
+    image_file = url_for(
+        'static', filename='profile_pics/' + user.image_file)
+    if form.validate_on_submit():
+        user.type = form.type.data
+        db.session.commit()
+        flash(f'The permissions for user: {user.username} have been set to {user.type}', 'success')
+        return redirect(url_for('permissions'))
+    elif request.method == 'GET':
+        form.type.data = user.type
+    return render_template('updatepermissions.html', calendar=calendar, form=form, user=user, image_file=image_file)
