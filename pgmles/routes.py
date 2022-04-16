@@ -167,28 +167,28 @@ def update_course(course_id):
 
 @app.route("/course/<int:course_id>", methods=[ 'GET', 'POST' ])
 def course(course_id):
-    form = SubscribeForm()
-    form2 = UnsubscribeForm()
+    sub_form = SubscribeForm()
+    unsub_form = UnsubscribeForm()
     teachers = User.query.filter_by(type='teacher')
     subscribed = None
     if current_user.is_authenticated:
         subscribed = CourseMember.query.filter_by(user_id=current_user.id, course_id=course_id).first()
 
-    if form.validate_on_submit() and not subscribed:
+    if sub_form.validate_on_submit() and not subscribed:
         course = CourseMember(user_id=current_user.id, course_id=course_id)
         db.session.add(course)
         db.session.commit()
         flash('U bent nu ingeschreven!', 'success')
         return redirect('/')
 
-    if form2.validate_on_submit() and subscribed:
+    if unsub_form.validate_on_submit() and subscribed:
         db.session.delete(subscribed)
         db.session.commit()
         flash('U bent nu uitgeschreven!', 'success')
         return redirect('/')
 
     course = Course.query.get_or_404(course_id)
-    return render_template('course.html', calendar=make_calendar(), title=course.name, course=course, form=form, form2=form2, show=not subscribed, teachers=teachers)
+    return render_template('course.html', calendar=make_calendar(), title=course.name, course=course, sub_form=sub_form, unsub_form=unsub_form, subscribed=subscribed is not None, teachers=teachers)
 
 @app.route("/delete_course/<int:course_id>", methods=['GET','POST'])
 @login_required
@@ -198,7 +198,7 @@ def delete_course(course_id):
     course = Course.query.get_or_404(course_id)
     db.session.delete(course)
     db.session.commit()
-    return redirect('/')
+    return redirect(url_for('course_overview'))
 
 @app.route("/permissions", methods=['GET','POST'])
 @login_required
@@ -212,12 +212,12 @@ def permissions():
             flash(f'Geen gebruker gevonden: {form.username.data}', 'danger')
         else:
             flash(f'Gebruiker gevonden: {form.username.data}', 'success')
-            return redirect(url_for('updatePermissions', user_id= user.id))
+            return redirect(url_for('update_permissions', user_id= user.id))
     return render_template('permissions.html', calendar=make_calendar(), form=form)
 
 @app.route("/permissions/update/<int:user_id>", methods=['GET','POST'])
 @login_required
-def updatePermissions(user_id):
+def update_permissions(user_id):
     if current_user.type != "admin":
         abort(403)
     form = PermissionForm()

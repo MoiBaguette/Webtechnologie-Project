@@ -48,7 +48,7 @@ class NewCourseForm(FlaskForm):
     description = TextAreaField('Beschrijving', validators=[ DataRequired() ])
     teacher_id = SelectField('Docent', validators=[ DataRequired() ], coerce=int)
     weekday = SelectField('Weekdag', choices=list(enumerate([ 'Maandag', 'Dinsdag', 'Woensdag', 'Donderdag', 'Vrijdag', 'Zaterdag', 'Zondag' ])))
-    start = StringField('Begim', validators=[ DataRequired() ])
+    start = StringField('Begin', validators=[ DataRequired() ])
     end = StringField('Einde', validators=[ DataRequired() ])
     location = StringField('Locatie', validators=[ DataRequired(), Length(min=1, max=100) ])
     submit = SubmitField('Bewerken')

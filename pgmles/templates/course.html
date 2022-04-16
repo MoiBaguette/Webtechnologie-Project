@@ -12,18 +12,18 @@
         </div>
         <div class="article-metadata">
             {% if current_user.is_authenticated %}
-                {% if show %}
+                {% if not subscribed %}
                 <form method="POST" action="">
-                    {{ form.hidden_tag() }}
+                    {{ sub_form.hidden_tag() }}
                     <div class="form-group">
-                        {{ form.submit(class="btn btn-outline-info") }}
+                        {{ sub_form.submit(class="btn btn-outline-info") }}
                     </div>
                 </form>
                 {% else %}
                 <form method="POST" action="">
-                    {{ form2.hidden_tag() }}
+                    {{ unsub_form.hidden_tag() }}
                     <div class="form-group">
-                        {{ form2.submit(class="btn btn-outline-info") }}
+                        {{ unsub_form.submit(class="btn btn-outline-info") }}
                     </div>
                 </form>
                 {%endif%}
