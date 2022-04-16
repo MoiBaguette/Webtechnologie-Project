@@ -8,7 +8,7 @@ from calendar import Calendar as Month
 from datetime import datetime
 
 from .server import app, bcrypt, db
-from .forms import LoginForm, NewCourseForm, PermissionForm, RegistrationForm, SearchForm, SubscribeForm, UnsubscribeForm, UpdateAccountForm
+from .forms import LoginForm, NewCourseForm, AdminForm, RegistrationForm, SearchForm, SubscribeForm, UnsubscribeForm, UpdateAccountForm
 from .models import Course, CourseMember, User
 
 
@@ -200,9 +200,9 @@ def delete_course(course_id):
     db.session.commit()
     return redirect(url_for('course_overview'))
 
-@app.route("/permissions", methods=['GET','POST'])
+@app.route("/admin", methods=['GET','POST'])
 @login_required
-def permissions():
+def admin():
     if current_user.type != "admin":
         abort(403)
     form = SearchForm()
@@ -212,22 +212,22 @@ def permissions():
             flash(f'Geen gebruker gevonden: {form.username.data}', 'danger')
         else:
             flash(f'Gebruiker gevonden: {form.username.data}', 'success')
-            return redirect(url_for('update_permissions', user_id= user.id))
-    return render_template('permissions.html', calendar=make_calendar(), form=form)
+            return redirect(url_for('admin_user', user_id= user.id))
+    return render_template('admin.html', calendar=make_calendar(), form=form)
 
-@app.route("/permissions/update/<int:user_id>", methods=['GET','POST'])
+@app.route("/admin/<int:user_id>", methods=['GET','POST'])
 @login_required
-def update_permissions(user_id):
+def admin_user(user_id):
     if current_user.type != "admin":
         abort(403)
-    form = PermissionForm()
+    form = AdminForm()
     user = User.query.filter_by(id=user_id).first()
     image_file = url_for('static', filename='profile_pics/' + user.image_file)
     if form.validate_on_submit():
         user.type = form.type.data
         db.session.commit()
         flash(f'De gebruiker {user.username} is nu een {user.type}', 'success')
-        return redirect(url_for('permissions'))
+        return redirect(url_for('admin'))
     elif request.method == 'GET':
         form.type.data = user.type
-    return render_template('updatepermissions.html', calendar=make_calendar(), form=form, user=user, image_file=image_file)
+    return render_template('admin_user.html', calendar=make_calendar(), form=form, user=user, image_file=image_file)

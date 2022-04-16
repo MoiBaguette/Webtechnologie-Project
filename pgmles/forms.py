@@ -67,6 +67,6 @@ class SearchForm(FlaskForm):
     username = StringField('Naam', validators=[ DataRequired(), Length(min=2, max=20)])
     submit = SubmitField('Zoeken')
 
-class PermissionForm(FlaskForm):
+class AdminForm(FlaskForm):
     type = SelectField('Type',  choices=[('client', 'Klant'), ('teacher', 'Docent'), ('admin', 'Administrator')])
     submit = SubmitField('Bewerken')
