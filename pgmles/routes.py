@@ -96,11 +96,13 @@ def save_picture(form_picture):
 def account():
     form = UpdateAccountForm()
     if form.validate_on_submit():
+        current_user.username = form.username.data
+        current_user.email = form.email.data
         if form.picture.data:
             picture_file = save_picture(form.picture.data)
             current_user.image_file = picture_file
-        current_user.username = form.username.data
-        current_user.email = form.email.data
+        if form.password.data:
+            current_user.password = bcrypt.generate_password_hash(form.password.data).decode('utf-8')
         db.session.commit()
         flash('Uw profiel werd bewerkt!', 'success')
         return redirect(url_for('account'))

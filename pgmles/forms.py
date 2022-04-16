@@ -32,6 +32,8 @@ class LoginForm(FlaskForm):
 class UpdateAccountForm(FlaskForm):
     username = StringField('Naam', validators=[ DataRequired(), Length(min=2, max=20) ])
     email = StringField('E-Mail', validators=[ DataRequired(), Email() ])
+    password = PasswordField('Wachtwoord', validators=[])
+    confirm_password = PasswordField('Wachtwoord herhalen', validators=[ EqualTo('password') ])
     picture = FileField('Profielfoto bewerken', validators=[ FileAllowed(['jpg', 'png']) ])
     submit = SubmitField('Bewerken')
 
