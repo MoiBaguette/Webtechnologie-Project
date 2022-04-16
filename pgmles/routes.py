@@ -231,3 +231,25 @@ def admin_user(user_id):
     elif request.method == 'GET':
         form.type.data = user.type
     return render_template('admin_user.html', calendar=make_calendar(), form=form, user=user, image_file=image_file)
+
+@app.route("/delete_user/<int:user_id>", methods=['GET','POST'])
+@login_required
+def delete_user(user_id):
+    if current_user.type != "admin":
+        abort(403)
+    user = User.query.get_or_404(user_id)
+    db.session.delete(user)
+    db.session.commit()
+    flash(f'De gebruiker {user.username} werd verwijdert', 'success')
+    return redirect(url_for('admin'))
+
+@app.route("/reset_user/<int:user_id>", methods=['GET','POST'])
+@login_required
+def reset_user(user_id):
+    if current_user.type != "admin":
+        abort(403)
+    user = User.query.get_or_404(user_id)
+    user.password = bcrypt.generate_password_hash(user.email).decode('utf-8')
+    db.session.commit()
+    flash(f'{user.username}\'s is nu zijn/haar e-mail', 'success')
+    return redirect(url_for('admin'))
