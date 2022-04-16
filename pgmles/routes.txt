@@ -1,0 +1,13 @@
+/ -> index.html
+/about -> about.html
+/register -> register.html
+/login -> login.html
+/logout -> /
+/account -> account.html
+/course_overview -> course_overview.html @ teacher/admin
+/course_overview/new_course -> new_course.html / course_overview.html @ teacher/admin
+/course_overview/course_update/:id -> new_course.html / course_overview.html @ teacher/admin
+/course/:id -> / / course.html 
+/delete_course/:id -> / @ teacher/admin
+/permissions -> permissions.html @ admin
+/permissions/update/:id -> updatepermissions.html / permissions.html @ admin

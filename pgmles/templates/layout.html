@@ -11,38 +11,28 @@
     <link rel="stylesheet" type="text/css" href="{{ url_for('static', filename='main.css') }}">
 
     {% if title %}
-        <title>Flask Blog - {{ title }}</title>
+        <title>Programmeerles voor ouderen - {{ title }}</title>
     {% else %}
-        <title>Flask Blog</title>
+        <title>Programmeerles voor ouderen</title>
     {% endif %}
 </head>
 <body>
     <header class="site-header">
       <nav class="navbar navbar-expand-md navbar-dark bg-steel fixed-top">
         <div class="container">
-          <a class="navbar-brand mr-4" href="/">Flask Blog</a>
-          <button class="navbar-toggler" type="button" data-toggle="collapse" data-target="#navbarToggle" aria-controls="navbarToggle" aria-expanded="false" aria-label="Toggle navigation">
-            <span class="navbar-toggler-icon"></span>
-          </button>
+          <a class="navbar-brand mr-4" href="/">Programmeerles voor ouderen</a>
           <div class="collapse navbar-collapse" id="navbarToggle">
             <div class="navbar-nav mr-auto">
-              <a class="nav-item nav-link" href="{{ '/' }}">Home</a>
-              <a class="nav-item nav-link" href="{{ '/' }}">About</a>
-              {% if current_user.type == "teacher" %}
-              <a class="nav-item nav-link" href="{{ url_for('course_overview') }}">Course overview</a>
-              {% endif %}
-              {% if current_user.type == "admin" %}
-                <a class="nav-item nav-link" href="{{ url_for('admin') }}">Admin</a>
-              {% endif %}	
+              <a class="nav-item nav-link" href="/about">Over ons</a>
             </div>
             <!-- Navbar Right Side -->
             <div class="navbar-nav">
               {% if current_user.is_authenticated %}  
-                <a class="nav-item nav-link" href="{{ url_for('account') }}">Account</a>
-                <a class="nav-item nav-link" href="{{ url_for('logout') }}">Logout</a>
+                <a class="nav-item nav-link" href="{{ url_for('account') }}">Profiel</a>
+                <a class="nav-item nav-link" href="{{ url_for('logout') }}">Uitloggen</a>
               {% else %}
-                <a class="nav-item nav-link" href="{{ url_for('login') }}">Login</a>
-                <a class="nav-item nav-link" href="{{ url_for('register') }}">Register</a>
+                <a class="nav-item nav-link" href="{{ url_for('login') }}">Inloggen</a>
+                <a class="nav-item nav-link" href="{{ url_for('register') }}">Registeren</a>
               {% endif %}
             </div>
           </div>
@@ -65,41 +55,40 @@
         </div>
         <div class="col-md-4">
           <div class="content-section">
-            <h3>Our Sidebar</h3>
-            <p class='text-muted'>You can put any information here you'd like.
+            <h3>Welkom <b>{{ current_user.username if current_user.is_authenticated else 'gast' }}</b>!</h3>
+            {% if current_user.type == 'teacher' or current_user.type == 'admin' %}
+            <p class='text-muted'>
               <ul class="list-group">
-                <li class="list-group-item list-group-item-light">Latest Posts</li>
-                <li class="list-group-item list-group-item-light">Announcements</li>
-                <li class="list-group-item list-group-item-light">Calendars</li>
-                <li class="list-group-item list-group-item-light">etc</li>
+                <li class="list-group-item list-group-item-light"><a href="{{ url_for('course_overview') }}">Lesoverzicht</a></li>
+                {% if current_user.type == 'admin' %}
+                <li class="list-group-item list-group-item-light"><a href="{{ url_for('permissions') }}">Rechten bewerken</a></li>
+                {% endif %}
               </ul>
             </p>
+            {% endif %}
             <table class='calendar'>
               <tr>
-                {% for d, day in calendar.weekdays %}
+                {% for d, day in calendar['weekdays'] %}
                   <th class="{{ 'weekend' if d >= 5 }}">{{ day }}</th>
                 {% endfor %}
               </tr>
-              {% for row in calendar.rows %}
+              {% for row in calendar['rows'] %}
                 <tr>
-                  {% for d, day, lesson in row %}
-                      <td class="{{ 'weekend' if d >= 5 }} {{ 'lesson' if lesson }}">
+                  {% for d, day, course in row %}
+                      <td class="{{ 'weekend' if d >= 5 }} {{ 'course' if course and day }}">
                         {{ day if day }}
-                        {% if lesson %}<span class='hover-day'>{{ lesson }}</span>{% endif %}
+                        {% if course %}<span class='hover-day'>{{ course }}</span>{% endif %}
                       </td>
                   {% endfor %}
                 </tr>
              {% endfor %}
             </table>
-            {{ calendar.nextlesson }}
           </div>
         </div>
       </div>
     </main>
 
 
-    <!-- Optional JavaScript -->
-    <!-- jQuery first, then Popper.js, then Bootstrap JS -->
     <script src="https://code.jquery.com/jquery-3.2.1.slim.min.js" integrity="sha384-KJ3o2DKtIkvYIK3UENzmM7KCkRr/rE9/Qpg6aAZGJwFDMVNA/GpGFF93hXpG5KkN" crossorigin="anonymous"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/popper.js/1.12.9/umd/popper.min.js" integrity="sha384-ApNbgh9B+Y1QKtv3Rn7W3mgPxhU9K/ScQsAP7hUibX39j7fakFPskvXusvfa0b4Q" crossorigin="anonymous"></script>
     <script src="https://maxcdn.bootstrapcdn.com/bootstrap/4.0.0/js/bootstrap.min.js" integrity="sha384-JZR6Spejh4U02d8jOt6vLEHfe/JQGiRRSQQxSfFWpi1MquVdAyjUar5+76PVCmYl" crossorigin="anonymous"></script>

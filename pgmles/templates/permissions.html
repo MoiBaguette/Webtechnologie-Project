@@ -1,11 +1,11 @@
 {% extends "layout.html" %}
 {% block content %}
-    <h1>Update permissions</h1>
+    <h1>Rechten bewerken!</h1>
     <div class="content-section">
         <form method="POST" action="">
             {{ form.hidden_tag() }}
             <fieldset class="form-group">
-                <legend class="border-bottom mb-4">Search</legend>
+                <legend class="border-bottom mb-4">Zoeken</legend>
                 <div class="form-group">
                     {{ form.username.label(class="form-control-label") }}
                     {% if form.username.errors %}

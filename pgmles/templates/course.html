@@ -6,14 +6,10 @@
               {{ course.name }} 
               {{ '(subscribed)' if course.id in subs }}
             </a></h2>
-            <p>{{course.description}}</p>
-            <p>De cursus <b>{{course.name}}</b> wordt gegeven door
-              {% for teacher in teachers %}
-                {{ teacher.username if teacher.id == course.teacher_id }}
-              {% endfor %}
-            </p>
-            <p>Elke {{ ['maandag', 'dinsdag', 'woensdag', 'donderdag', 'vrijdag', 'zaterdag', 'zondag'][course.weekday] }}, {{ course.start }} uur t/m {{ course.end }} uur op locatie: {{ course.location }}</p>
-          </div>
+            <p><i>{{ course.description }}</i></p>
+			<p>wordt gegeven door {% for teacher in teachers if teacher.id == course.teacher_id %}{{ teacher.username  }},{% endfor %}</p>
+			<p>elke {{ ['maandag', 'dinsdag', 'woensdag', 'donderdag', 'vrijdag', 'zaterdag', 'zondag'][course.weekday] }} {{ course.start }} uur t/m {{ course.end }} uur op locatie: <b>{{ course.location }}</b></p>
+        </div>
         <div class="article-metadata">
             {% if current_user.is_authenticated %}
                 {% if show %}
@@ -32,7 +28,7 @@
                 </form>
                 {%endif%}
             {% else %}
-                <p> Please Log in to subscribe to course</p>
+                <p><a href="{{ url_for('login') }}">Inloggen om in te schrijven</a></p>
             {% endif %}
         </div>
     </article>

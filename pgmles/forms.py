@@ -7,84 +7,66 @@ from wtforms.validators import DataRequired, Email, EqualTo, Length, ValidationE
 from .models import User
 
 class RegistrationForm(FlaskForm):
-    username = StringField('Username', validators=[ DataRequired(), Length(min=2, max=20) ])
-    email = StringField('Email', validators=[ DataRequired(), Email() ])
-    password = PasswordField('Password', validators=[ DataRequired() ])
-    confirm_password = PasswordField('Confirm Password', validators=[ DataRequired(), EqualTo('password') ])
-    submit = SubmitField('Sign Up')
+    username = StringField('Naam', validators=[ DataRequired(), Length(min=2, max=20) ])
+    email = StringField('E-Mail', validators=[ DataRequired(), Email() ])
+    password = PasswordField('Wachtwoord', validators=[ DataRequired() ])
+    confirm_password = PasswordField('Wachtwoord herhalen', validators=[ DataRequired(), EqualTo('password') ])
+    submit = SubmitField('Registeren')
 
     def validate_username(self, username):
         if User.query.filter_by(username=username.data).first():
-            raise ValidationError('That username is taken. Please choose a different one.')
+            raise ValidationError('Deze gebruikersnaam bestaat al, kies een andere.')
 
     def validate_email(self, email):
         if User.query.filter_by(email=email.data).first():
-            raise ValidationError('That email is taken. Please choose a different one.')
+            raise ValidationError('Deze e-mail bestaat al, log in als dat uw e-mail is')
 
 
 class LoginForm(FlaskForm):
-    email = StringField('Email', validators=[ DataRequired(), Email() ])
-    password = PasswordField('Password', validators=[ DataRequired() ])
-    remember = BooleanField('Remember Me')
-    submit = SubmitField('Login')
+    email = StringField('E-Mail', validators=[ DataRequired(), Email() ])
+    password = PasswordField('Wachtwoord', validators=[ DataRequired() ])
+    remember = BooleanField('Herinneren')
+    submit = SubmitField('Inloggen')
 
 
 class UpdateAccountForm(FlaskForm):
-    username = StringField('Username', validators=[ DataRequired(), Length(min=2, max=20) ])
-    email = StringField('Email', validators=[ DataRequired(), Email() ])
-    picture = FileField('Update Profile Picture', validators=[ FileAllowed(['jpg', 'png']) ])
-    submit = SubmitField('Update')
+    username = StringField('Naam', validators=[ DataRequired(), Length(min=2, max=20) ])
+    email = StringField('E-Mail', validators=[ DataRequired(), Email() ])
+    picture = FileField('Profielfoto bewerken', validators=[ FileAllowed(['jpg', 'png']) ])
+    submit = SubmitField('Bewerken')
 
     def validate_username(self, username):
-        if username.data != current_user.username:
-            user = User.query.filter_by(username=username.data).first()
-            if user:
-                raise ValidationError('That username is taken. Please choose a different one.')
+        if username.data != current_user.username and User.query.filter_by(username=username.data).first():
+            raise ValidationError('Deze gebruikersnaam bestaat al, kies een andere.')
 
     def validate_email(self, email):
-        if email.data != current_user.email:
-            user = User.query.filter_by(email=email.data).first()
-            if user:
-                raise ValidationError('That email is taken. Please choose a different one.')
-
-
-class LanguageForm(FlaskForm):
-    name = StringField('Name', validators=[ DataRequired() ])
-    info = TextAreaField('Info', validators=[ DataRequired() ])
-    submit = SubmitField('Update')
-
+        if email.data != current_user.email and User.query.filter_by(email=email.data).first():
+            raise ValidationError('Deze e-mail bestaat al, log in als dat uw e-mail is')
 
 class NewCourseForm(FlaskForm):
-    name = StringField('Title', validators=[ DataRequired(), Length(min=1, max=100) ])
-    description = TextAreaField('Description', validators=[ DataRequired() ])
-    teacher_id = SelectField('Teacher', validators=[ DataRequired() ], coerce=int)
-    weekday = StringField('Weekday', validators=[ DataRequired() ])
-    start = StringField('Start', validators=[ DataRequired() ])
-    end = StringField('End', validators=[ DataRequired() ])
-    location = StringField('Location', validators=[ DataRequired(), Length(min=1, max=100) ])
-    submit = SubmitField('Add')
+    name = StringField('Naam', validators=[ DataRequired(), Length(min=1, max=100) ])
+    description = TextAreaField('Beschrijving', validators=[ DataRequired() ])
+    teacher_id = SelectField('Docent', validators=[ DataRequired() ], coerce=int)
+    weekday = SelectField('Weekdag', choices=list(enumerate([ 'Maandag', 'Dinsdag', 'Woensdag', 'Donderdag', 'Vrijdag', 'Zaterdag', 'Zondag' ])))
+    start = StringField('Begim', validators=[ DataRequired() ])
+    end = StringField('Einde', validators=[ DataRequired() ])
+    location = StringField('Locatie', validators=[ DataRequired(), Length(min=1, max=100) ])
+    submit = SubmitField('Bewerken')
 
 
 class SubscribeForm(FlaskForm):
     lang_id = HiddenField()
-    submit = SubmitField('Subscribe')
+    submit = SubmitField('Inschrijven')
 
 
 class UnsubscribeForm(FlaskForm):
     lang_id = HiddenField()
-    submit = SubmitField('Unsubscribe')
-
-
-class PostForm(FlaskForm):  # redundant
-    title = StringField('Title', validators=[ DataRequired() ])
-    content = TextAreaField('Content', validators=[ DataRequired() ])
-    submit = SubmitField('Post')
+    submit = SubmitField('Uitschrijven')
 
 class SearchForm(FlaskForm):
-    username = StringField('Username', validators=[
-                           DataRequired(), Length(min=2, max=20)])
-    submit = SubmitField('Search')
+    username = StringField('Naam', validators=[ DataRequired(), Length(min=2, max=20)])
+    submit = SubmitField('Zoeken')
 
 class PermissionForm(FlaskForm):
-    type = SelectField('Type',  choices=[('client', 'Klant'), ('teacher', 'Leraar'), ('admin', 'Administrator')])
-    submit = SubmitField('Update')
+    type = SelectField('Type',  choices=[('client', 'Klant'), ('teacher', 'Docent'), ('admin', 'Administrator')])
+    submit = SubmitField('Bewerken')
