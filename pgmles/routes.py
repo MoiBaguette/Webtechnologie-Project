@@ -155,7 +155,7 @@ def course_overview():
     if current_user.type not in [ "admin", "teacher" ]:
         flash('U mag deze website niet bereiken', 'error')
         return redirect('/')
-    courses = [ (c, User.query.filter_by(id=c.id).first() ) for c in Course.query.all() ]
+    courses = [ (c, User.query.filter_by(id=c.teacher_id).first() ) for c in Course.query.all() ]
     return render_template('course_overview.html', calendar=make_calendar(), legend='Lesoverzicht', courses=courses)
 
 """ new_course.html route """
