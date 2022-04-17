@@ -1,10 +1,17 @@
 # PROGRAMMEERLES VOOR OUDEREN
 
+[Repository](https://github.com/MoiBaguette/Webtechnologie-Project)
+
 ## De server runnen
 
 Dit is een dev-server, dus run je met `debug=True`-flag!
 
 *Als onze website zo goed is, om het in production te runnen, verwijder het `debug=True` :beers:*
+
+**Deze repository clonen:**
+```
+$ git clone https://github.com/MoiBaguette/Webtechnologie-Project
+```
 
 **Alle afhankelijkheden installeren:**
 ```
