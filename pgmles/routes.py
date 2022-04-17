@@ -121,7 +121,7 @@ def account():
     return render_template('account.html', calendar=make_calendar(), title='Profiel', image_file=image_file, form=form)
 
 """ course_overview.html route """
-@app.route("/course_overview")
+@app.route("/courses")
 @login_required
 def course_overview():
     if current_user.type not in [ "admin", "teacher" ]:
@@ -129,8 +129,34 @@ def course_overview():
     courses = [ (c, User.query.filter_by(id=c.id).first() ) for c in Course.query.all() ]
     return render_template('course_overview.html', calendar=make_calendar(), title='Lesoverzicht', courses=courses)
 
+""" course.html (course-info) route """
+@app.route("/course/<int:course_id>", methods=[ 'GET', 'POST' ])
+def course(course_id):
+    sub_form = SubscribeForm()
+    unsub_form = UnsubscribeForm()
+    teachers = User.query.filter_by(type='teacher')
+    subscribed = None
+    if current_user.is_authenticated:
+        subscribed = CourseMember.query.filter_by(user_id=current_user.id, course_id=course_id).first()
+
+    if sub_form.validate_on_submit() and not subscribed:
+        course = CourseMember(user_id=current_user.id, course_id=course_id)
+        db.session.add(course)
+        db.session.commit()
+        flash('U bent nu ingeschreven!', 'success')
+        return redirect('/')
+
+    if unsub_form.validate_on_submit() and subscribed:
+        db.session.delete(subscribed)
+        db.session.commit()
+        flash('U bent nu uitgeschreven!', 'success')
+        return redirect('/')
+
+    course = Course.query.get_or_404(course_id)
+    return render_template('course.html', calendar=make_calendar(), title=course.name, course=course, sub_form=sub_form, unsub_form=unsub_form, subscribed=subscribed is not None, teachers=teachers)
+
 """ new_course.html route """
-@app.route("/course_overview/new_course", methods=['GET', 'POST'])
+@app.route("/course/new", methods=['GET', 'POST'])
 @login_required
 def new_course():
     if current_user.type not in [ "admin", "teacher" ]:
@@ -146,7 +172,7 @@ def new_course():
     return render_template('new_course.html', calendar=make_calendar(), title='Nieuwe les', form=form)
 
 """ new_course.html (update course) route """
-@app.route("/course_overview/course_update/<int:course_id>", methods=['GET', 'POST'])
+@app.route("/course/<int:course_id>/update", methods=['GET', 'POST'])
 @login_required
 def update_course(course_id):
     if current_user.type not in [ "admin", "teacher" ]:
@@ -175,34 +201,8 @@ def update_course(course_id):
         form.location.data = course.location
     return render_template('new_course.html', calendar=make_calendar(), form=form, legend='Update Language')
 
-""" course.html (course-info) route """
-@app.route("/course/<int:course_id>", methods=[ 'GET', 'POST' ])
-def course(course_id):
-    sub_form = SubscribeForm()
-    unsub_form = UnsubscribeForm()
-    teachers = User.query.filter_by(type='teacher')
-    subscribed = None
-    if current_user.is_authenticated:
-        subscribed = CourseMember.query.filter_by(user_id=current_user.id, course_id=course_id).first()
-
-    if sub_form.validate_on_submit() and not subscribed:
-        course = CourseMember(user_id=current_user.id, course_id=course_id)
-        db.session.add(course)
-        db.session.commit()
-        flash('U bent nu ingeschreven!', 'success')
-        return redirect('/')
-
-    if unsub_form.validate_on_submit() and subscribed:
-        db.session.delete(subscribed)
-        db.session.commit()
-        flash('U bent nu uitgeschreven!', 'success')
-        return redirect('/')
-
-    course = Course.query.get_or_404(course_id)
-    return render_template('course.html', calendar=make_calendar(), title=course.name, course=course, sub_form=sub_form, unsub_form=unsub_form, subscribed=subscribed is not None, teachers=teachers)
-
 """ delete-course route """
-@app.route("/delete_course/<int:course_id>", methods=['GET','POST'])
+@app.route("/course/<int:course_id>/delete", methods=['GET','POST'])
 @login_required
 def delete_course(course_id):
     if current_user.type not in [ "admin", "teacher" ]:
@@ -213,7 +213,7 @@ def delete_course(course_id):
     return redirect(url_for('course_overview'))
 
 """ admin.html route """
-@app.route("/admin", methods=['GET','POST'])
+@app.route("/users", methods=['GET','POST'])
 @login_required
 def admin():
     if current_user.type != "admin":
@@ -229,7 +229,7 @@ def admin():
     return render_template('admin.html', calendar=make_calendar(), form=form)
 
 """ account-admin route """
-@app.route("/admin/<int:user_id>", methods=['GET','POST'])
+@app.route("/user/<int:user_id>", methods=['GET','POST'])
 @login_required
 def admin_user(user_id):
     if current_user.type != "admin":
@@ -247,7 +247,7 @@ def admin_user(user_id):
     return render_template('admin_user.html', calendar=make_calendar(), form=form, user=user, image_file=image_file)
 
 """ delete-user route """
-@app.route("/delete_user/<int:user_id>", methods=['GET','POST'])
+@app.route("/user/<int:user_id>/delete", methods=['GET','POST'])
 @login_required
 def delete_user(user_id):
     if current_user.type != "admin":
@@ -259,7 +259,7 @@ def delete_user(user_id):
     return redirect(url_for('admin'))
 
 """ reset user's password route """
-@app.route("/reset_user/<int:user_id>", methods=['GET','POST'])
+@app.route("/user/<int:user_id>/reset", methods=['GET','POST'])
 @login_required
 def reset_user(user_id):
     if current_user.type != "admin":
