@@ -171,7 +171,7 @@ def new_course():
         course = Course(name=form.name.data, description=form.description.data, teacher_id=form.teacher_id.data, weekday=form.weekday.data, start=form.start.data, end=form.end.data, location=form.location.data)
         db.session.add(course)
         db.session.commit()
-        flash('De les werd toegevoegd!', 'success')
+        flash('De les is toegevoegd!', 'success')
         return redirect(url_for('course_overview'))
     return render_template('new_course.html', calendar=make_calendar(), legend='Nieuwe les aanmaken', form=form)
 
@@ -194,7 +194,7 @@ def update_course(course_id):
         course.end = form.end.data
         course.location = form.location.data
         db.session.commit()
-        flash('De les werd bewerkt!', 'success')
+        flash('De les is bewerkt!', 'success')
         return redirect(url_for('course_overview'))
     elif request.method == 'GET':
         form.name.data = course.name

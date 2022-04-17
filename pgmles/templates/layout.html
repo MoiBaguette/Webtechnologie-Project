@@ -73,6 +73,7 @@
                     </ul>
                     </p>
                     {% endif %}
+                    {% if current_user.is_authenticated %}
                     <table class='calendar'>
                         <tr>
                             {% for d, day in calendar['weekdays'] %}
@@ -90,6 +91,7 @@
                         </tr>
                         {% endfor %}
                     </table>
+                    {% endif %}
                 </div>
             </div>
         </div>
