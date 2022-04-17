@@ -18,37 +18,37 @@ $ python run.py
 
 ## Uitleg
 
-### Routes
+### Bestanden
 
-| route                       | bestand              | beschrikbaar als<sup>1</sup> | beschrijving                                           |
-| --------------------------- | -------------------- | ---------------------------- | ------------------------------------------------------ |
-| /                           | index.html           | gast                         | home-pagina                                            |
-| /about                      | about.html           | gast                         | over ons                                               |
-| /register                   | register.html        | gast                         | registeren van een gebruiker<sup>2</sup>               |
-| /login                      | login.html           | gast                         | inloggen van een gebruiker<sup>2,3</sup>               |
-| /logout                     | *redirect: /*        | klant                        | uitloggen van een gebruiker                            |
-| /courses                    | course_overview.html | docent                       | lessen bewerken/verwijderen                            |
-| /course/new                 | new_course.html      | docent                       | nieuwe les aanmaken                                    |
-| /course/`:course_id`        | course.html          | klant                        | les informatie                                         |
-| /course/`:course_id`/update | new_course.html      | docent                       | les instellingen                                       |
-| /course/`:course_id`/delete | *redirect: /courses* | docent                       | les verwijderen                                        |
-| /users                      | admin.html           | admin                        | gebruiker overzicht<sup>4</sup>                        |
-| /user/self                  | account.html         | klant                        | profiel instellingen                                   |
-| /user/`:user_id`            | admin_user.html      | admin                        | gebruiker instellingen                                 |
-| /user/`:user_id`/delete     | *redirect: /users*   | admin                        | gebruiker verwijderen                                  |
-| /user/`:user_id`/reset      | *redirect: /users*   | admin                        | gebruikers wachtwoord terugzetten<sup>5</sup>          |
-| *not found*                 | index.html           |                              | 404 page not found handler                             |
-| **overige bestanden**       | ---                  | ---                          | ---                                                    |
-|                             | forms.py             |                              | alle forms voor de websites                            |
-|                             | models.py            |                              | alle database structs, om alle tabellen te beschrijven |
-|                             | routes.py            |                              | alle routen en endpoints                               |
-|                             | server.py            |                              | de server initialatie, database etc.                   |
-|                             | site.db              |                              | hoofd-database voor users, courses etc.                |
-|                             | .gitignore           |                              | om git te stoppen, \__pycache__ mee up te laden        |
-|                             | run.py               |                              | om de server te runnen                                 |
-|                             | layout.html          |                              | de basis layout voor alle routen                       |
-|                             | static/main.css      |                              | de basis stylesheet voor alle routen                   |
-|                             | static/profile_pics  |                              | map met alle profielfoto's                             |
+| bestand               | route                       | beschrikbaar als<sup>1</sup> | beschrijving                                           |
+|-----------------------|-----------------------------|------------------------------|--------------------------------------------------------|
+| index.html            | /                           | gast                         | home-pagina                                            |
+| about.html            | /about                      | gast                         | over ons                                               |
+| register.html         | /register                   | gast                         | registeren van een gebruiker<sup>2</sup>               |
+| login.html            | /login                      | gast                         | inloggen van een gebruiker<sup>2,3</sup>               |
+|                       | /logout                     | klant                        | uitloggen van een gebruiker                            |
+| course_overview.html  | /courses                    | docent                       | lessen bewerken/verwijderen                            |
+| new_course.html       | /course/new                 | docent                       | nieuwe les aanmaken                                    |
+| course.html           | /course/`:course_id`        | klant                        | les informatie                                         |
+| new_course.html       | /course/`:course_id`/update | docent                       | les instellingen                                       |
+|                       | /course/`:course_id`/delete | docent                       | les verwijderen                                        |
+| admin.html            | /users                      | admin                        | gebruiker overzicht<sup>4</sup>                        |
+| account.html          | /user/self                  | klant                        | profiel instellingen                                   |
+| admin_user.html       | /user/`:user_id`            | admin                        | gebruiker instellingen                                 |
+|                       | /user/`:user_id`/delete     | admin                        | gebruiker verwijderen                                  |
+|                       | /user/`:user_id`/reset      | admin                        | gebruikers wachtwoord terugzetten<sup>5</sup>          |
+| index.html            | *not found*                 |                              | 404 page not found handler                             |
+| **overige bestanden** |                             |                              |                                                        |
+| forms.py              |                             |                              | alle forms voor de websites                            |
+| models.py             |                             |                              | alle database structs, om alle tabellen te beschrijven |
+| routes.py             |                             |                              | alle routen en endpoints                               |
+| server.py             |                             |                              | de server initialatie, database etc.                   |
+| site.db               |                             |                              | hoofd-database voor users, courses etc.                |
+| .gitignore            |                             |                              | om git te stoppen, \__pycache__ mee up te laden        |
+| run.py                |                             |                              | om de server te runnen                                 |
+| layout.html           |                             |                              | de basis layout voor alle routen                       |
+| static/main.css       |                             |                              | de basis stylesheet voor alle routen                   |
+| static/profile_pics   |                             |                              | map met alle profielfoto's                             |
 
 > <sup>1</sup> de hierachie is: gast (niet ingelogd), klant, docent, admin<br>
 > dus kan een gast het minste bereiken, een klant ook kan alles bereiken wat gast mag etc.
