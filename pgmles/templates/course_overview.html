@@ -1,14 +1,21 @@
 {% extends "layout.html" %}
 {% block content %}
-<h1>Course Overview
-  <a class="btn btn-secondary btn-sm mt-1 mb-1" href="{{ url_for('new_course') }}">Nieuwe les</a>
-</h1>
+<article class="media content-section">
+  <legend class="border-bottom mb-4"><h1>{{ legend }}</h1></legend>
+</article>
+<article class="media content-section">
+<div class="media-body">
+  <div>
+    <a class="btn btn-secondary btn-sm mt-1 mb-1" href="{{ url_for('new_course') }}">Nieuwe les</a>
+  </div>
+</div>
+</article>
 {% for course, teacher in courses %}
 <article class="media content-section">
   <div class="media-body">
     <h2><a class="article-title" href="{{url_for('course', course_id=course.id)}}">{{course.name}} <small>by {{ teacher.username }}</small></a></h2>
     <div>
-        <a class="btn btn-secondary btn-sm mt-1 mb-1" href="{{ url_for('update_course', course_id = course.id) }}">Bewerkem</a>
+        <a class="btn btn-secondary btn-sm mt-1 mb-1" href="{{ url_for('update_course', course_id = course.id) }}">Bewerken</a>
         <button type="button" class="btn btn-danger btn-sm m-1" data-toggle="modal" data-target="#deleteModal">Verwijderen</button>
     </div>
   </div>

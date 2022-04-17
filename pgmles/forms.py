@@ -51,7 +51,7 @@ class NewCourseForm(FlaskForm):
     start = StringField('Begin', validators=[ DataRequired() ])
     end = StringField('Einde', validators=[ DataRequired() ])
     location = StringField('Locatie', validators=[ DataRequired(), Length(min=1, max=100) ])
-    submit = SubmitField('Bewerken')
+    submit = SubmitField('Versturen')
 
 
 class SubscribeForm(FlaskForm):

@@ -117,7 +117,7 @@ def course_overview():
     if current_user.type not in [ "admin", "teacher" ]:
         abort(403)
     courses = [ (c, User.query.filter_by(id=c.id).first() ) for c in Course.query.all() ]
-    return render_template('course_overview.html', calendar=make_calendar(), title='Lesoverzicht', courses=courses)
+    return render_template('course_overview.html', calendar=make_calendar(), legend='Lesoverzicht', courses=courses)
 
 
 @app.route("/course_overview/new_course", methods=['GET', 'POST'])
@@ -133,7 +133,7 @@ def new_course():
         db.session.commit()
         flash('De les werd toegevoegd!', 'success')
         return redirect(url_for('course_overview'))
-    return render_template('new_course.html', calendar=make_calendar(), title='Nieuwe les', form=form)
+    return render_template('new_course.html', calendar=make_calendar(), legend='Nieuwe les aanmaken', form=form)
 
 
 @app.route("/course_overview/course_update/<int:course_id>", methods=['GET', 'POST'])
@@ -163,7 +163,7 @@ def update_course(course_id):
         form.start.data = course.start
         form.end.data = course.end
         form.location.data = course.location
-    return render_template('new_course.html', calendar=make_calendar(), form=form, legend='Update Language')
+    return render_template('new_course.html', calendar=make_calendar(), form=form, legend='Les aanpassen')
 
 @app.route("/course/<int:course_id>", methods=[ 'GET', 'POST' ])
 def course(course_id):
@@ -209,9 +209,9 @@ def admin():
     if form.validate_on_submit():
         user = User.query.filter_by(username=form.username.data).first()
         if user == None:
-            flash(f'Geen gebruker gevonden: {form.username.data}', 'danger')
+            flash(f'Geen gebrukers gevonden met de gebruikersnaam: {form.username.data}!', 'danger')
         else:
-            flash(f'Gebruiker gevonden: {form.username.data}', 'success')
+            flash(f'Gebruiker gevonden met gebruikersnaam: {form.username.data}!', 'success')
             return redirect(url_for('admin_user', user_id= user.id))
     return render_template('admin.html', calendar=make_calendar(), form=form)
 
