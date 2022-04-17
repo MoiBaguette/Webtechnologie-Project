@@ -2,15 +2,14 @@
 <html>
 
 <head>
-    <!-- Required meta tags -->
     <meta charset="utf-8">
     <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
 
-    <!-- Bootstrap CSS -->
     <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/4.0.0/css/bootstrap.min.css"
         integrity="sha384-Gn5384xqQ1aoWXA+058RXPxPg6fy4IWvTNh0E263XmFcJlSAwiGgFAW/dAiS6JXm" crossorigin="anonymous">
 
     <link rel="stylesheet" type="text/css" href="{{ url_for('static', filename='main.css') }}">
+    <link rel="stylesheet" type="text/css" href="{{ url_for('static', filename='openmoji/openmoji.css') }}">
 
     {% if title %}
     <title>Programmeerles voor ouderen - {{ title }}</title>
@@ -26,7 +25,7 @@
                 <a class="navbar-brand mr-4" href="/">Programmeerles voor ouderen</a>
                 <div class="collapse navbar-collapse" id="navbarToggle">
                     <div class="navbar-nav mr-auto">
-                        <a class="nav-item nav-link" href="/about">Over ons</a>
+                        <a class="nav-item nav-link" href="{{ url_for('about') }}">Over ons</a>
                     </div>
                     <!-- Navbar Right Side -->
                     <div class="navbar-nav">
