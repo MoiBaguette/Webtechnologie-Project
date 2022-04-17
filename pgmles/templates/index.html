@@ -1,16 +1,32 @@
 {% extends "layout.html" %}
 {% block content %}
-    {% for course in courses %}
-        <article class="media content-section">
-          <div class="media-body">
-            <h2><a class="article-title" href="{{url_for('course', course_id=course.id)}}">
-              {{ course.name }} 
-              {{ '(subscribed)' if course.id in subs }}
-            </a></h2>
-            <p><i>{{ course.description }}</i></p>
-            <p>wordt gegeven door {% for teacher in teachers if teacher.id == course.teacher_id %}{{ teacher.username  }},{% endfor %}</p>
-            <p>elke {{ ['maandag', 'dinsdag', 'woensdag', 'donderdag', 'vrijdag', 'zaterdag', 'zondag'][course.weekday] }} {{ course.start }} uur t/m {{ course.end }} uur op locatie: <b>{{ course.location }}</b></p>
-          </div>
-        </article>
-    {% endfor %}
+<article class="media content-section">
+  <div class="media-body">
+    <h2>Dit zijn ons lessen</h2>
+    <p>
+      U kan makkelijk op de titel van een les klikken om in te schrijven!
+    </p>
+  </div>
+</article>
+{% for course in courses %}
+<article class="media content-section">
+  <div class="media-body">
+    <h3><a class="article-title" href="{{url_for('course', course_id=course.id)}}">
+        {{ course.name }}
+        {{ '(subscribed)' if course.id in subs }}
+      </a></h3>
+    <p><i>{{ course.description }}</i></p>
+    <p>
+      wordt gegeven door
+      {% for teacher in teachers if teacher.id == course.teacher_id %}
+      {{ teacher.username }},
+      {% endfor %}
+    </p>
+    <p>
+      elke {{ ['maandag', 'dinsdag', 'woensdag', 'donderdag', 'vrijdag', 'zaterdag', 'zondag'][course.weekday] }}
+      {{ course.start }} uur t/m {{ course.end }} uur op locatie: <b>{{ course.location }}</b>
+    </p>
+  </div>
+</article>
+{% endfor %}
 {% endblock content %}
