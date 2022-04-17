@@ -4,6 +4,8 @@
 
 Dit is een dev-server, dus run je met `debug=True`-flag!
 
+*Als onze website zo goed is, om het in production te runnen, verwijder het `debug=True` &#127867;*
+
 **Alle afhankelijkheden installeren:**
 ```
 $ pip3 install flask wtforms flask_sqlalchemy flask-wtf email_validator flask-bcrypt flask-login pillow
@@ -39,7 +41,8 @@ $ python run.py
 |                             | static/profile_pics  |                              | map met alle profielfoto's inclusief default profielfoto |
 
 > <sup>1</sup> de hierachie is: gast (niet ingelogd), klant, docent, admin<br>
-> dus kan een gast het minste bereiken, een klant ook kan alles bereiken wat gast mag etc.
+> dus kan een gast het minste bereiken, een klant ook kan alles bereiken wat gast mag etc.<br>
+> probeert bijvoorbeeld de klant een admin-pagina te bereiken wordt een 403-error gegooid
 
 > <sup>2</sup> als hij al ingelogd is, wordt weer naar `/` redirect
 

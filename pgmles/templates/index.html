@@ -13,7 +13,7 @@
     <div class="media-body">
         <h3><a class="article-title" href="{{url_for('course', course_id=course.id)}}">
                 {{ course.name }}
-                {{ '(subscribed)' if course.id in subs }}
+                {{ '(ingescheven)' if course.id in subs }}
             </a></h3>
         <p><i>{{ course.description }}</i></p>
         <p>
