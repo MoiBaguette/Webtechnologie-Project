@@ -1,4 +1,29 @@
 {% extends "layout.html" %}
 {% block content %}
-    <h1>Over ons</h1>
+<article class="media content-section">
+    <div class="media-body">
+        <h2>Over ons</h2>
+        <p>
+            Wij staan voor educatie in Nederland! <i>IT Academy Nederland (ITAN)</i>
+            <!-- Zo heet de bedrijf in opdracht schriftelijk vaardigheden -->
+            geeft lessen aan verschillende mensen in heel Nederland, maar tot nu toe nooit aan ouderen.
+        </p>
+        <p>
+            Samen met <i>Groningen-Drenthe Systems (GDS)</i> ontwikkelden wij deze pagina om ook ouderen mogelijk te
+            maken
+            in hun vrije tijd iets nieuws te leren.
+        </p>
+        <p>
+            Vele pensioenaten waren vroeger BASIC-programmeurs, COBOL of Assembly op hun Commandore 64. Wij proberen dit
+            op te pakken en te vernieuwen met
+            moderne talen zoals Python, Java of JavaScript. Natuurlijk bieden wij ook verschillende lessen voor
+            beginners aan.
+        </p>
+        <p>
+            U bent hartelijk welkom en wij hopen u in ons lessen te kunnen zien!<br>
+            <a href="{{ url_for('register') }}">Klik hier</a>, om een profiel aan te maken en voor lessen in te
+            schrijven.
+        </p>
+    </div>
+</article>
 {% endblock content %}

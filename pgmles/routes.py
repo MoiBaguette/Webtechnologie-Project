@@ -12,6 +12,7 @@ from .forms import LoginForm, NewCourseForm, AdminForm, RegistrationForm, Search
 from .models import Course, CourseMember, User
 
 
+""" calendar-function to calculate days, etc. for calendar """
 def make_calendar():
     weekdays = list(enumerate(['Ma', 'Di', 'Wo', 'Do', 'Vr', 'Za', 'Zo']))
 
@@ -29,7 +30,7 @@ def make_calendar():
 
     return { 'weekdays': weekdays, 'rows': rows }
 
-
+""" index.html (home-page) route """
 @app.route("/")
 def index():
     courses = Course.query.all()
@@ -39,13 +40,16 @@ def index():
         subscriptions = [ cm.course_id for cm in CourseMember.query.filter_by(user_id=current_user.id) ]
     return render_template('index.html', calendar=make_calendar(), courses=courses, subs=subscriptions, teachers=teachers)
 
+""" about.html route """
 @app.route("/about")
 def about():
     return render_template('about.html', calendar=make_calendar(), title='Over ons')
 
+""" register.html route """
 @app.route("/register", methods=['GET', 'POST'])
 def register():
     if current_user.is_authenticated:
+        flash('U bent al ingelogd', 'warning')
         return redirect('/')
     form = RegistrationForm()
     if form.validate_on_submit():
@@ -57,27 +61,32 @@ def register():
         return redirect(url_for('login'))
     return render_template('register.html', calendar=make_calendar(), title='Registeren', form=form)
 
-
+""" login.html route """
 @app.route("/login", methods=['GET', 'POST'])
 def login():
     if current_user.is_authenticated:
+        flash('U bent al ingelogd', 'warning')
         return redirect('/')
     form = LoginForm()
     if form.validate_on_submit():
         user = User.query.filter_by(email=form.email.data).first()
         if user and bcrypt.check_password_hash(user.password, form.password.data):
             login_user(user, remember=form.remember.data)
+            if bcrypt.check_password_hash(user.password, form.email.data):
+                flash('Wij zullen aanbevelen uw wachtwoord weer te veranderen', 'warning')
             next_page = request.args.get('next')
             return redirect(next_page if next_page else '/')
         else:
             flash('Kon niet inloggen, is uw e-mail en wachtwoord juist?', 'danger')
     return render_template('login.html', calendar=make_calendar(), title='Inloggen', form=form)
 
+""" logout route """
 @app.route("/logout")
 def logout():
     logout_user()
     return redirect('/')
 
+""" save-picture function for account.html """
 def save_picture(form_picture):
     random_hex = secrets.token_hex(8)
     _, f_ext = os.path.splitext(form_picture.filename)
@@ -91,18 +100,21 @@ def save_picture(form_picture):
 
     return picture_fn
 
-@app.route("/account", methods=[ 'GET', 'POST' ])
+""" account.html route """
+@app.route("/user/self", methods=[ 'GET', 'POST' ])
 @login_required
 def account():
     form = UpdateAccountForm()
     if form.validate_on_submit():
+        current_user.username = form.username.data
+        current_user.email = form.email.data
         if form.picture.data:
             picture_file = save_picture(form.picture.data)
             current_user.image_file = picture_file
-        current_user.username = form.username.data
-        current_user.email = form.email.data
+        if form.password.data:
+            current_user.password = bcrypt.generate_password_hash(form.password.data).decode('utf-8')
         db.session.commit()
-        flash('Uw profiel werd bewerkt!', 'success')
+        flash('Uw profiel is bewerkt!', 'success')
         return redirect(url_for('account'))
     elif request.method == 'GET':
         form.username.data = current_user.username
@@ -110,8 +122,34 @@ def account():
     image_file = url_for('static', filename='profile_pics/' + current_user.image_file)
     return render_template('account.html', calendar=make_calendar(), title='Profiel', image_file=image_file, form=form)
 
+""" course.html (course-info) route """
+@app.route("/course/<int:course_id>", methods=[ 'GET', 'POST' ])
+def course(course_id):
+    sub_form = SubscribeForm()
+    unsub_form = UnsubscribeForm()
+    teachers = User.query.filter_by(type='teacher')
+    subscribed = None
+    if current_user.is_authenticated:
+        subscribed = CourseMember.query.filter_by(user_id=current_user.id, course_id=course_id).first()
 
-@app.route("/course_overview")
+    if sub_form.validate_on_submit() and not subscribed:
+        course = CourseMember(user_id=current_user.id, course_id=course_id)
+        db.session.add(course)
+        db.session.commit()
+        flash('U bent nu ingeschreven!', 'success')
+        return redirect('/')
+
+    if unsub_form.validate_on_submit() and subscribed:
+        db.session.delete(subscribed)
+        db.session.commit()
+        flash('U bent nu uitgeschreven!', 'success')
+        return redirect('/')
+
+    course = Course.query.get_or_404(course_id)
+    return render_template('course.html', calendar=make_calendar(), title=course.name, course=course, sub_form=sub_form, unsub_form=unsub_form, subscribed=subscribed is not None, teachers=teachers)
+
+""" course_overview.html route """
+@app.route("/courses")
 @login_required
 def course_overview():
     if current_user.type not in [ "admin", "teacher" ]:
@@ -119,8 +157,8 @@ def course_overview():
     courses = [ (c, User.query.filter_by(id=c.id).first() ) for c in Course.query.all() ]
     return render_template('course_overview.html', calendar=make_calendar(), legend='Lesoverzicht', courses=courses)
 
-
-@app.route("/course_overview/new_course", methods=['GET', 'POST'])
+""" new_course.html route """
+@app.route("/course/new", methods=['GET', 'POST'])
 @login_required
 def new_course():
     if current_user.type not in [ "admin", "teacher" ]:
@@ -135,8 +173,8 @@ def new_course():
         return redirect(url_for('course_overview'))
     return render_template('new_course.html', calendar=make_calendar(), legend='Nieuwe les aanmaken', form=form)
 
-
-@app.route("/course_overview/course_update/<int:course_id>", methods=['GET', 'POST'])
+""" new_course.html (update course) route """
+@app.route("/course/<int:course_id>/update", methods=['GET', 'POST'])
 @login_required
 def update_course(course_id):
     if current_user.type not in [ "admin", "teacher" ]:
@@ -165,32 +203,8 @@ def update_course(course_id):
         form.location.data = course.location
     return render_template('new_course.html', calendar=make_calendar(), form=form, legend='Les aanpassen')
 
-@app.route("/course/<int:course_id>", methods=[ 'GET', 'POST' ])
-def course(course_id):
-    sub_form = SubscribeForm()
-    unsub_form = UnsubscribeForm()
-    teachers = User.query.filter_by(type='teacher')
-    subscribed = None
-    if current_user.is_authenticated:
-        subscribed = CourseMember.query.filter_by(user_id=current_user.id, course_id=course_id).first()
-
-    if sub_form.validate_on_submit() and not subscribed:
-        course = CourseMember(user_id=current_user.id, course_id=course_id)
-        db.session.add(course)
-        db.session.commit()
-        flash('U bent nu ingeschreven!', 'success')
-        return redirect('/')
-
-    if unsub_form.validate_on_submit() and subscribed:
-        db.session.delete(subscribed)
-        db.session.commit()
-        flash('U bent nu uitgeschreven!', 'success')
-        return redirect('/')
-
-    course = Course.query.get_or_404(course_id)
-    return render_template('course.html', calendar=make_calendar(), title=course.name, course=course, sub_form=sub_form, unsub_form=unsub_form, subscribed=subscribed is not None, teachers=teachers)
-
-@app.route("/delete_course/<int:course_id>", methods=['GET','POST'])
+""" delete-course route """
+@app.route("/course/<int:course_id>/delete", methods=['GET','POST'])
 @login_required
 def delete_course(course_id):
     if current_user.type not in [ "admin", "teacher" ]:
@@ -200,7 +214,8 @@ def delete_course(course_id):
     db.session.commit()
     return redirect(url_for('course_overview'))
 
-@app.route("/admin", methods=['GET','POST'])
+""" admin.html route """
+@app.route("/users", methods=['GET','POST'])
 @login_required
 def admin():
     if current_user.type != "admin":
@@ -215,7 +230,8 @@ def admin():
             return redirect(url_for('admin_user', user_id= user.id))
     return render_template('admin.html', calendar=make_calendar(), form=form)
 
-@app.route("/admin/<int:user_id>", methods=['GET','POST'])
+""" account-admin route """
+@app.route("/user/<int:user_id>", methods=['GET','POST'])
 @login_required
 def admin_user(user_id):
     if current_user.type != "admin":
@@ -231,3 +247,27 @@ def admin_user(user_id):
     elif request.method == 'GET':
         form.type.data = user.type
     return render_template('admin_user.html', calendar=make_calendar(), form=form, user=user, image_file=image_file)
+
+""" delete-user route """
+@app.route("/user/<int:user_id>/delete", methods=['GET','POST'])
+@login_required
+def delete_user(user_id):
+    if current_user.type != "admin":
+        abort(403)
+    user = User.query.get_or_404(user_id)
+    db.session.delete(user)
+    db.session.commit()
+    flash(f'De gebruiker {user.username} werd verwijdert', 'success')
+    return redirect(url_for('admin'))
+
+""" reset user's password route """
+@app.route("/user/<int:user_id>/reset", methods=['GET','POST'])
+@login_required
+def reset_user(user_id):
+    if current_user.type != "admin":
+        abort(403)
+    user = User.query.get_or_404(user_id)
+    user.password = bcrypt.generate_password_hash(user.email).decode('utf-8')
+    db.session.commit()
+    flash(f'{user.username}\'s is nu zijn/haar e-mail', 'success')
+    return redirect(url_for('admin'))

@@ -12,4 +12,5 @@ login_manager = LoginManager(app)
 login_manager.login_view = 'login'
 login_manager.login_message_category = 'info'
 
+# to run 'routes.py' and make the routes available
 from .routes import *

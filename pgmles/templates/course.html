@@ -1,35 +1,37 @@
 {% extends "layout.html" %}
 {% block content %}
-    <article class="media content-section">
-        <div class="media-body">
-            <h2><a class="article-title" href="{{url_for('course', course_id=course.id)}}">
-              {{ course.name }} 
-              {{ '(subscribed)' if course.id in subs }}
+<article class="media content-section">
+    <div class="media-body">
+        <h2><a class="article-title" href="{{url_for('course', course_id=course.id)}}">
+                {{ course.name }}
+                {{ '(subscribed)' if course.id in subs }}
             </a></h2>
-            <p><i>{{ course.description }}</i></p>
-			<p>wordt gegeven door {% for teacher in teachers if teacher.id == course.teacher_id %}{{ teacher.username  }},{% endfor %}</p>
-			<p>elke {{ ['maandag', 'dinsdag', 'woensdag', 'donderdag', 'vrijdag', 'zaterdag', 'zondag'][course.weekday] }} {{ course.start }} uur t/m {{ course.end }} uur op locatie: <b>{{ course.location }}</b></p>
-        </div>
-        <div class="article-metadata">
-            {% if current_user.is_authenticated %}
-                {% if not subscribed %}
-                <form method="POST" action="">
-                    {{ sub_form.hidden_tag() }}
-                    <div class="form-group">
-                        {{ sub_form.submit(class="btn btn-outline-info") }}
-                    </div>
-                </form>
-                {% else %}
-                <form method="POST" action="">
-                    {{ unsub_form.hidden_tag() }}
-                    <div class="form-group">
-                        {{ unsub_form.submit(class="btn btn-outline-info") }}
-                    </div>
-                </form>
-                {%endif%}
-            {% else %}
-                <p><a href="{{ url_for('login') }}">Inloggen om in te schrijven</a></p>
-            {% endif %}
-        </div>
-    </article>
+        <p><i>{{ course.description }}</i></p>
+        <p>wordt gegeven door {% for teacher in teachers if teacher.id == course.teacher_id %}{{ teacher.username }},{%
+            endfor %}</p>
+        <p>elke {{ ['maandag', 'dinsdag', 'woensdag', 'donderdag', 'vrijdag', 'zaterdag', 'zondag'][course.weekday] }}
+            {{ course.start }} uur t/m {{ course.end }} uur op locatie: <b>{{ course.location }}</b></p>
+    </div>
+    <div class="article-metadata">
+        {% if current_user.is_authenticated %}
+        {% if not subscribed %}
+        <form method="POST" action="">
+            {{ sub_form.hidden_tag() }}
+            <div class="form-group">
+                {{ sub_form.submit(class="btn btn-outline-info") }}
+            </div>
+        </form>
+        {% else %}
+        <form method="POST" action="">
+            {{ unsub_form.hidden_tag() }}
+            <div class="form-group">
+                {{ unsub_form.submit(class="btn btn-outline-info") }}
+            </div>
+        </form>
+        {%endif%}
+        {% else %}
+        <p><a href="{{ url_for('login') }}">Inloggen om in te schrijven</a></p>
+        {% endif %}
+    </div>
+</article>
 {% endblock content %}
