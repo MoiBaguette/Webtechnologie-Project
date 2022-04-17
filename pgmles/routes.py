@@ -153,7 +153,8 @@ def course(course_id):
 @login_required
 def course_overview():
     if current_user.type not in [ "admin", "teacher" ]:
-        abort(403)
+        flash('U mag deze website niet bereiken', 'error')
+        return redirect('/')
     courses = [ (c, User.query.filter_by(id=c.id).first() ) for c in Course.query.all() ]
     return render_template('course_overview.html', calendar=make_calendar(), legend='Lesoverzicht', courses=courses)
 
@@ -162,7 +163,8 @@ def course_overview():
 @login_required
 def new_course():
     if current_user.type not in [ "admin", "teacher" ]:
-        abort(403)
+        flash('U mag deze website niet bereiken', 'error')
+        return redirect('/')
     form = NewCourseForm()
     form.teacher_id.choices = [ (g.id, g.username) for g in User.query.filter_by(type='teacher') ]
     if form.validate_on_submit():
@@ -178,7 +180,8 @@ def new_course():
 @login_required
 def update_course(course_id):
     if current_user.type not in [ "admin", "teacher" ]:
-        abort(403)
+        flash('U mag deze website niet bereiken', 'error')
+        return redirect('/')
     form = NewCourseForm()
     form.teacher_id.choices = [ (g.id, g.username) for g in User.query.filter_by(type='teacher') ]
     course = Course.query.get_or_404(course_id)
@@ -208,7 +211,8 @@ def update_course(course_id):
 @login_required
 def delete_course(course_id):
     if current_user.type not in [ "admin", "teacher" ]:
-        abort(403)
+        flash('U mag deze website niet bereiken', 'error')
+        return redirect('/')
     course = Course.query.get_or_404(course_id)
     db.session.delete(course)
     db.session.commit()
@@ -219,7 +223,8 @@ def delete_course(course_id):
 @login_required
 def admin():
     if current_user.type != "admin":
-        abort(403)
+        flash('U mag deze website niet bereiken', 'error')
+        return redirect('/')
     form = SearchForm()
     if form.validate_on_submit():
         user = User.query.filter_by(username=form.username.data).first()
@@ -235,7 +240,8 @@ def admin():
 @login_required
 def admin_user(user_id):
     if current_user.type != "admin":
-        abort(403)
+        flash('U mag deze website niet bereiken', 'error')
+        return redirect('/')
     form = AdminForm()
     user = User.query.filter_by(id=user_id).first()
     image_file = url_for('static', filename='profile_pics/' + user.image_file)
@@ -253,7 +259,8 @@ def admin_user(user_id):
 @login_required
 def delete_user(user_id):
     if current_user.type != "admin":
-        abort(403)
+        flash('U mag deze website niet bereiken', 'error')
+        return redirect('/')
     user = User.query.get_or_404(user_id)
     db.session.delete(user)
     db.session.commit()
@@ -265,9 +272,16 @@ def delete_user(user_id):
 @login_required
 def reset_user(user_id):
     if current_user.type != "admin":
-        abort(403)
+        flash('U mag deze website niet bereiken', 'error')
+        return redirect('/')
     user = User.query.get_or_404(user_id)
     user.password = bcrypt.generate_password_hash(user.email).decode('utf-8')
     db.session.commit()
     flash(f'{user.username}\'s is nu zijn/haar e-mail', 'success')
     return redirect(url_for('admin'))
+
+""" 404 not found handler """
+@app.errorhandler(404)
+def not_found(error):
+    flash(f"Deze pagina werd niet gevonden", 'danger')
+    return index() # geen redirect om de '/bla' te houden
