@@ -16,6 +16,7 @@ $ pip3 install flask wtforms flask_sqlalchemy flask-wtf email_validator flask-bc
 $ python run.py
 ```
 
+
 ## Uitleg
 
 ### Bestanden
@@ -60,3 +61,12 @@ $ python run.py
 > <sup>4</sup> bij gebruiker zoeken moet de naam overeinkomen met de gebruikers naam, nog geen echte zoek-functie
 
 > <sup>5</sup> betekent: zijn wachtwoord is dan gelijk aan zijn e-mail om in te loggen en zijn wachtwoord weer te veranderen, als iemand zijn wachtwoord is vergeten
+
+
+## Test Profielen
+
+| type    | e-mail            | password |
+|---------|-------------------|----------|
+| klant   | user@mail.com     | `hallo`  |
+| docent  | docent@mail.com   | `hallo`  |
+| admin   | admin@mail.com    | `hallo`  |
