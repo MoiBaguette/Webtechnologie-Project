@@ -72,6 +72,8 @@ def login():
         user = User.query.filter_by(email=form.email.data).first()
         if user and bcrypt.check_password_hash(user.password, form.password.data):
             login_user(user, remember=form.remember.data)
+            if bcrypt.check_password_hash(user.password, form.email.data):
+                flash('Wij zullen aanbevelen uw wachtwoord weer te veranderen', 'warning')
             next_page = request.args.get('next')
             return redirect(next_page if next_page else '/')
         else:
@@ -99,7 +101,7 @@ def save_picture(form_picture):
     return picture_fn
 
 """ account.html route """
-@app.route("/account", methods=[ 'GET', 'POST' ])
+@app.route("/user/self", methods=[ 'GET', 'POST' ])
 @login_required
 def account():
     form = UpdateAccountForm()
@@ -112,22 +114,13 @@ def account():
         if form.password.data:
             current_user.password = bcrypt.generate_password_hash(form.password.data).decode('utf-8')
         db.session.commit()
-        flash('Uw profiel werd bewerkt!', 'success')
+        flash('Uw profiel is bewerkt!', 'success')
         return redirect(url_for('account'))
     elif request.method == 'GET':
         form.username.data = current_user.username
         form.email.data = current_user.email
     image_file = url_for('static', filename='profile_pics/' + current_user.image_file)
     return render_template('account.html', calendar=make_calendar(), title='Profiel', image_file=image_file, form=form)
-
-""" course_overview.html route """
-@app.route("/courses")
-@login_required
-def course_overview():
-    if current_user.type not in [ "admin", "teacher" ]:
-        abort(403)
-    courses = [ (c, User.query.filter_by(id=c.id).first() ) for c in Course.query.all() ]
-    return render_template('course_overview.html', calendar=make_calendar(), title='Lesoverzicht', courses=courses)
 
 """ course.html (course-info) route """
 @app.route("/course/<int:course_id>", methods=[ 'GET', 'POST' ])
@@ -154,6 +147,15 @@ def course(course_id):
 
     course = Course.query.get_or_404(course_id)
     return render_template('course.html', calendar=make_calendar(), title=course.name, course=course, sub_form=sub_form, unsub_form=unsub_form, subscribed=subscribed is not None, teachers=teachers)
+
+""" course_overview.html route """
+@app.route("/courses")
+@login_required
+def course_overview():
+    if current_user.type not in [ "admin", "teacher" ]:
+        abort(403)
+    courses = [ (c, User.query.filter_by(id=c.id).first() ) for c in Course.query.all() ]
+    return render_template('course_overview.html', calendar=make_calendar(), title='Lesoverzicht', courses=courses)
 
 """ new_course.html route """
 @app.route("/course/new", methods=['GET', 'POST'])
